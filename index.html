@@ -1,0 +1,1741 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>植物观察笔记 · Botany Field Notes</title>
+<style>
+:root{
+  --bg:#f6f5f0; --panel:#fffefb; --ink:#1f2419; --muted:#6b7263;
+  --line:#dcdccf; --accent:#3f6b3f; --accent-soft:#e8efe4;
+  --warn:#9a5b1e; --danger:#a33; --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14170f; --panel:#1c2016; --ink:#e6e8df; --muted:#9aa38f;
+    --line:#2e3427; --accent:#8fbf7f; --accent-soft:#232b1e;
+    --warn:#d9a05b; --danger:#e07a6f;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",Segoe UI,sans-serif;}
+header{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;padding:10px 18px;flex-wrap:wrap}
+h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.02em}
+h1 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;color:var(--muted);padding:6px 13px;
+  border-radius:99px;cursor:pointer;font-size:14px;font-family:inherit}
+nav button:hover{color:var(--ink)}
+nav button.on{background:var(--accent-soft);color:var(--accent);border-color:var(--line);font-weight:600}
+main{max-width:960px;margin:0 auto;padding:22px 18px 80px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+button.primary{background:var(--accent);color:#fff;border:0;padding:10px 20px;border-radius:8px;
+  cursor:pointer;font-size:15px;font-family:inherit;font-weight:600}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink);padding:7px 14px;
+  border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px}
+button.ghost:hover{border-color:var(--accent)}
+input[type=text],input[type=password],textarea,select{
+  width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);
+  padding:9px 11px;border-radius:8px;font-family:inherit;font-size:14px}
+textarea{resize:vertical;min-height:60px}
+label.fld{display:block;margin-bottom:12px}
+label.fld span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;letter-spacing:.04em}
+#drop{border:2px dashed var(--line);border-radius:var(--radius);padding:40px 20px;text-align:center;
+  color:var(--muted);cursor:pointer;transition:.15s}
+#drop:hover,#drop.hot{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+#preview{max-width:100%;max-height:420px;border-radius:var(--radius);display:block;margin:0 auto}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.muted{color:var(--muted)}
+.tiny{font-size:12px}
+.sec-title{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sec-title:first-child{margin-top:0}
+dl.grid{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;margin:0}
+dl.grid dt{color:var(--muted);font-size:13px;white-space:nowrap}
+dl.grid dd{margin:0}
+.sci{font-style:italic}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;
+  background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);font-weight:600}
+.pill.med{color:var(--warn)} .pill.low{color:var(--danger)}
+.feat{border-left:3px solid var(--accent);padding:2px 0 2px 12px;margin-bottom:14px}
+.feat b{display:block;font-size:14px}
+.feat .obs{font-size:14px}
+.feat .why{font-size:13px;color:var(--muted);margin-top:2px}
+.veil{position:relative}
+.veil.hidden > .veil-body{filter:blur(9px);opacity:.5;pointer-events:none;user-select:none}
+.veil .reveal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.veil:not(.hidden) .reveal{display:none}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;cursor:pointer}
+.note:hover{border-color:var(--accent)}
+.note img{width:100%;height:140px;object-fit:cover;display:block;background:var(--bg)}
+.note div{padding:9px 11px}
+.note b{font-size:14px;display:block}
+.ghost.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);font-weight:600}
+.fig{width:100%;height:auto;display:block;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--accent);overflow:visible}
+.fig .thin{stroke-width:1}
+.fig .dash{stroke-dasharray:3 3}
+.fig .fill{fill:currentColor;opacity:.11;stroke:none}
+.fig .hl{stroke-width:3}
+.fig text{fill:var(--muted);stroke:none;font-size:8px;font-family:inherit}
+.figbox{max-width:210px;margin:0 auto}
+.figmini{width:62px;flex:0 0 62px}
+#cardface .figbox{margin:0 auto 18px}
+.feat.withfig{display:flex;gap:14px;align-items:flex-start}
+.feat.withfig>div{flex:1;min-width:0}
+.reallink{font-size:12px;color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
+.reallink:hover{color:var(--accent);border-color:var(--accent)}
+#cardface{text-align:center;padding:46px 20px}
+#cardface .term{font-size:30px;font-weight:650}
+#cardface .en{color:var(--muted);font-size:15px;margin-top:4px;font-style:italic}
+#cardface .def{margin-top:22px;font-size:16px;text-align:left;max-width:560px;
+  margin-left:auto;margin-right:auto;line-height:1.75}
+.err{background:#a3333318;border:1px solid var(--danger);color:var(--danger);
+  padding:11px 14px;border-radius:8px;margin-bottom:14px;font-size:14px;white-space:pre-wrap}
+.stat{display:flex;gap:26px;flex-wrap:wrap}
+.stat div b{display:block;font-size:26px;font-weight:650;color:var(--accent)}
+.stat div span{font-size:12px;color:var(--muted)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>植物观察笔记<small>morphology-first field notebook</small></h1>
+  <nav>
+    <button data-v="obs" class="on">观察</button>
+    <button data-v="book">笔记本</button>
+    <button data-v="deck">术语卡</button>
+    <button data-v="set">设置</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============ 观察 ============ -->
+<section class="view on" id="v-obs">
+  <div class="card">
+    <div id="drop">
+      <div id="drop-hint">
+        <b>拖入 / 点击选择 / 直接粘贴</b> 一张植物照片<br>
+        <span class="tiny">建议拍清楚：叶片正反面、叶柄与茎的连接处、花或果</span>
+      </div>
+      <img id="preview" hidden>
+    </div>
+    <input type="file" id="file" accept="image/*" hidden>
+
+    <label class="fld" style="margin-top:14px">
+      <span>补充线索（可选）—— 拍摄地点、生境、气味、你自己的猜测</span>
+      <input type="text" id="hint" placeholder="例：杭州西湖边，湿润林下，叶揉碎有辛辣味">
+    </label>
+
+    <div class="spread" style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border-radius:8px;font-size:13px">
+      <div>当前后端：<b id="active-backend-text">本地 Ollama (qwen3.8:27b-mlx)</b></div>
+      <button class="ghost" style="padding:3px 10px;font-size:12px" onclick="show('set')">切换后端/设置</button>
+    </div>
+
+    <div class="row">
+      <button class="primary" id="go" disabled>拆解这株植物</button>
+      <label class="tiny row" style="gap:5px;cursor:pointer">
+        <input type="checkbox" id="quiz" checked> 自测模式（先藏起名字，我先自己看特征）
+      </label>
+      <span id="status" class="tiny muted"></span>
+    </div>
+  </div>
+
+  <div id="err-box"></div>
+  <div id="result"></div>
+</section>
+
+<!-- ============ 笔记本 ============ -->
+<section class="view" id="v-book">
+  <div class="card">
+    <div class="stat" id="stats"></div>
+  </div>
+  <div class="notes" id="notes"></div>
+  <div id="detail"></div>
+</section>
+
+<!-- ============ 术语卡 ============ -->
+<section class="view" id="v-deck">
+  <div class="row" style="margin-bottom:14px;align-items:center">
+    <span class="tiny muted">练习方向</span>
+    <button class="ghost" id="mode-term">看词说定义</button>
+    <button class="ghost" id="mode-fig">看图认词</button>
+    <span class="tiny muted" style="margin-left:auto">「看图认词」才是野外真正用得上的方向</span>
+  </div>
+  <div class="card" id="deck-box">
+    <p class="muted">还没有术语卡。可以先从下面的「基础术语库」载入一个模块开练，也可以去「观察」分析一株植物让术语自动沉淀。</p>
+  </div>
+  <div class="card">
+    <div class="row" style="align-items:baseline">
+      <div class="sec-title" style="margin:0">基础术语库</div>
+      <span class="tiny muted" style="margin-left:auto" id="status2"></span>
+    </div>
+    <p class="tiny muted" style="margin:6px 0 14px">
+      不需要 API，直接载入即可开练。建议按顺序推进：<b>叶序 → 叶的组成 → 叶形/叶缘/叶脉 → 花序 → 花的结构 → 果实 → 常见科速记</b>。
+      每载入一个模块，就去野外找实物对应——认得出实物才算学会。
+    </p>
+    <div id="seed-list"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="ghost" id="seed-all">全部载入</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-title">全部术语</div>
+    <div id="allterms"></div>
+  </div>
+</section>
+
+<!-- ============ 设置 ============ -->
+<section class="view" id="v-set">
+  <div class="card">
+    <div class="sec-title">模型服务提供商 (Provider)</div>
+    <label class="fld">
+      <span>选择后端</span>
+      <select id="provider">
+        <option value="cpa">CPA 代理节点（gemini-flash / Claude）</option>
+        <option value="ollama">本地 Ollama（免费离线 · qwen3.8:27b-mlx）</option>
+        <option value="anthropic">Anthropic 官方 API（Claude 直连）</option>
+      </select>
+    </label>
+
+    <!-- CPA 代理配置 -->
+    <div id="set-cpa">
+      <label class="fld">
+        <span>CPA BASE URL</span>
+        <input type="text" id="cpa-base-url" placeholder="https://api.earnrmb.online">
+      </label>
+      <label class="fld">
+        <span>CPA AUTH TOKEN / API KEY</span>
+        <input type="password" id="cpa-key" placeholder="sk-...">
+      </label>
+      <div class="row">
+        <label class="fld" style="flex:1;min-width:180px;margin:0">
+          <span>模型</span>
+          <select id="cpa-model">
+            <option value="gemini-flash">gemini-flash（推荐 · 极速多模态）</option>
+            <option value="claude-opus-5">claude-opus-5（高精度推理）</option>
+            <option value="claude-sonnet-5">claude-sonnet-5（均衡）</option>
+          </select>
+        </label>
+      </div>
+      <p class="tiny muted" style="margin-top:14px">
+        已自动载入 <code>~/.claude/settings.jensen.json</code> 的 CPA 节点配置，默认使用 <code>gemini-flash</code> 进行多模态视觉观察。
+      </p>
+    </div>
+
+    <!-- Ollama 配置 -->
+    <div id="set-ollama" style="display:none">
+      <label class="fld">
+        <span>OLLAMA 服务地址</span>
+        <input type="text" id="ollama-host" placeholder="http://127.0.0.1:11434">
+      </label>
+      <div class="row">
+        <label class="fld" style="flex:1;min-width:180px;margin:0">
+          <span>OLLAMA 模型</span>
+          <div class="row" style="gap:8px">
+            <input type="text" id="ollama-model" placeholder="qwen3.8:27b-mlx" style="flex:1">
+            <select id="ollama-model-select" style="display:none;flex:1"></select>
+            <button class="ghost" id="fetch-ollama-models" type="button">获取已安装模型</button>
+          </div>
+        </label>
+      </div>
+      <p class="tiny muted" style="margin-top:14px">
+        确保本机已启动 <code>ollama serve</code>。推荐使用 <code>qwen3.8:27b-mlx</code> 等支持 Vision 的多模态模型。
+      </p>
+    </div>
+
+    <!-- Anthropic 配置 -->
+    <div id="set-anthropic" style="display:none">
+      <label class="fld">
+        <span>ANTHROPIC API KEY（只存在本机 localStorage，不会上传到任何地方）</span>
+        <input type="password" id="key" placeholder="sk-ant-...">
+      </label>
+      <div class="row">
+        <label class="fld" style="flex:1;min-width:180px;margin:0">
+          <span>模型</span>
+          <select id="model">
+            <option value="claude-opus-5">claude-opus-5（视觉最强，推荐）</option>
+            <option value="claude-sonnet-5">claude-sonnet-5（更快更便宜）</option>
+          </select>
+        </label>
+        <label class="fld" style="flex:1;min-width:180px;margin:0">
+          <span>思考强度 effort</span>
+          <select id="effort">
+            <option value="low">low — 快，认常见种够用</option>
+            <option value="medium" selected>medium — 均衡</option>
+            <option value="high">high — 疑难种/细微特征</option>
+          </select>
+        </label>
+      </div>
+      <p class="tiny muted" style="margin-top:14px">
+        浏览器直连 Anthropic API 需要 <code>anthropic-dangerous-direct-browser-access</code> 头，
+        key 会暴露在前端。<b>仅限本机自用，不要把这个文件部署到公网。</b>
+      </p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-title">数据</div>
+    <div class="row">
+      <button class="ghost" id="export">导出全部笔记 JSON</button>
+      <button class="ghost" id="wipe" style="border-color:var(--danger);color:var(--danger)">清空所有数据</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* =========================================================================
+   1. 存储层：IndexedDB（照片是 dataURL，localStorage 装不下）
+   ========================================================================= */
+const DB = (() => {
+  let db;
+  const open = () => new Promise((res, rej) => {
+    if (db) return res(db);
+    const r = indexedDB.open('plants', 1);
+    r.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('entries')) d.createObjectStore('entries', {keyPath:'id'});
+      if (!d.objectStoreNames.contains('cards'))   d.createObjectStore('cards',   {keyPath:'term'});
+    };
+    r.onsuccess = () => { db = r.result; res(db); };
+    r.onerror = () => rej(r.error);
+  });
+  const tx = async (store, mode, fn) => {
+    const d = await open();
+    return new Promise((res, rej) => {
+      const t = d.transaction(store, mode);
+      const req = fn(t.objectStore(store));
+      t.oncomplete = () => res(req && req.result);
+      t.onerror = () => rej(t.error);
+    });
+  };
+  return {
+    put:  (s, v) => tx(s, 'readwrite', o => o.put(v)),
+    all:  (s)    => tx(s, 'readonly',  o => o.getAll()),
+    del:  (s, k) => tx(s, 'readwrite', o => o.delete(k)),
+    clear:(s)    => tx(s, 'readwrite', o => o.clear()),
+  };
+})();
+
+/* =========================================================================
+   2. JSON Schema —— 这就是这个应用的「植物学观察大纲」
+      模型被强制逐项填写；填不出来必须写「无法判断」而不是编。
+      注意 Anthropic structured outputs 的限制：
+        · 每个 object 都要 additionalProperties:false 且列全 required
+        · 不支持 minLength/maxLength/minItems 等约束 → 用 description 引导
+   ========================================================================= */
+const S = (props) => ({
+  type:'object', properties:props, required:Object.keys(props), additionalProperties:false
+});
+const T = (desc) => ({type:'string', description:desc});
+
+const SCHEMA = S({
+  identification: S({
+    confidence:      {type:'string', enum:['high','medium','low'],
+                      description:'鉴定到属/种的把握。照片信息不足时必须给 low。'},
+    common_name_zh:  T('中文常用名。无把握写「无法判断」。'),
+    common_name_en:  T('英文常用名，没有则写 —'),
+    scientific_name: T('拉丁学名（属 + 种加词），只到属就写 Genus sp.'),
+    family_zh:       T('科的中文名，如「唇形科」'),
+    family_latin:    T('科的拉丁名，如 Lamiaceae'),
+    order_latin:     T('目的拉丁名，如 Lamiales'),
+    reasoning:       T('2-4 句：你是**从哪些可见形态特征**一步步推到这个科属的。像检索表一样推理，不要用「看起来像」。')
+  }),
+  habit: S({
+    growth_form: T('生活型：草本/灌木/乔木/藤本/附生 等，并说明依据'),
+    stem:        T('茎的形态：横切面形状（圆/四棱/三棱）、有无毛、直立或匍匐'),
+    phyllotaxy:  T('叶序：互生 alternate / 对生 opposite / 轮生 whorled / 基生 rosulate')
+  }),
+  leaf: S({
+    simple_or_compound: T('单叶 simple / 复叶 compound（羽状 pinnate、掌状 palmate…）'),
+    shape:   T('叶形：卵形 ovate / 披针形 lanceolate / 心形 cordate / 肾形 reniform …'),
+    margin:  T('叶缘：全缘 entire / 锯齿 serrate / 重锯齿 biserrate / 圆齿 crenate / 裂 lobed …'),
+    venation:T('叶脉：羽状脉 pinnate / 掌状脉 palmate / 平行脉 parallel / 弧形脉 arcuate'),
+    apex:    T('叶尖：渐尖 acuminate / 急尖 acute / 钝 obtuse / 凹 emarginate …'),
+    base:    T('叶基：楔形 cuneate / 心形 cordate / 偏斜 oblique / 抱茎 amplexicaul …'),
+    surface: T('叶面：质地、光泽、被毛情况（无毛 glabrous / 柔毛 pubescent / 腺点…）'),
+    petiole_stipule: T('叶柄与托叶：有无叶柄、托叶形态（托叶是重要的科级特征）')
+  }),
+  reproductive: S({
+    flower_visible: {type:'boolean', description:'照片中是否能看到花'},
+    inflorescence:  T('花序类型：总状 raceme / 伞形 umbel / 头状 capitulum / 聚伞 cyme / 穗状 spike…；无花写「未见花」'),
+    symmetry:       T('花对称性：辐射对称 actinomorphic / 两侧对称 zygomorphic；未见花写「未见花」'),
+    perianth:       T('花被：萼片与花瓣数目、离合情况（合瓣/离瓣）、颜色'),
+    androecium_gynoecium: T('雄蕊数目与着生、雌蕊心皮数、子房位置（上位 superior / 下位 inferior）'),
+    fruit:          T('果实类型：蒴果 capsule / 瘦果 achene / 浆果 berry / 荚果 legume…；未见果写「未见果」')
+  }),
+  diagnostic_features: {
+    type:'array',
+    description:'3-5 条**鉴别特征**——真正把它锁定到这个科属的关键，而非泛泛描述。',
+    items: S({
+      feature:      T('特征名称，中文术语 + 英文，如「四棱茎 quadrangular stem」'),
+      observation:  T('你在这张照片里具体看到了什么'),
+      significance: T('为什么这个特征有分类学意义：它排除了谁、指向了谁')
+    })
+  },
+  lookalikes: {
+    type:'array',
+    description:'1-3 个容易混淆的类群，尤其是同科不同属或形似不同科的。',
+    items: S({
+      name:          T('易混淆者的中文名 + 拉丁名'),
+      how_to_distinguish: T('用哪一个可观察的形态特征就能把两者分开')
+    })
+  },
+  glossary: {
+    type:'array',
+    description:'本次实际用到、且值得初学者记住的形态学术语，3-8 条。不要收录「叶子」这种常识词。',
+    items: S({
+      term_zh:   T('中文术语'),
+      term_en:   T('英文/拉丁术语'),
+      definition:T('一句话定义，说明这个术语描述的是哪个器官的哪种状态'),
+      seen_here: T('在这张照片里它具体表现为什么')
+    })
+  },
+  next_observation: T('若要把鉴定推进一步，下次该补看/补拍哪个部位？为什么那个部位关键？'),
+  uncertainty: T('明确说出这次判断的薄弱环节：哪些必要特征照片里看不到。')
+});
+
+const SYSTEM = `你是一位植物分类学家，同时也是野外实习课的老师。用户会给你一张植物照片，你的任务不是"报出名字"，而是**示范一次专业的形态观察**。
+
+工作原则：
+1. 严格基于照片中**实际可见**的证据。看不见的部位一律写"无法判断"或"未见花/未见果"，绝不根据物种猜测反推形态描述——那是循环论证。
+2. 所有形态描述必须使用规范术语，中文术语后附英文或拉丁文，让用户建立术语对照。
+3. reasoning 字段要写成检索表式的推理链：从最上位的特征逐步收窄（如：对生叶 + 四棱茎 + 唇形花冠 → 唇形科），而不是"整体感觉像"。
+4. 置信度要诚实。仅凭一张照片，多数情况下只能可靠地定到科或属；能定到种的往往是形态极特殊或栽培常见的类群。宁可给 low 也不要编造种加词。
+5. diagnostic_features 是教学核心：每条都要说清"这个特征排除了什么、指向了什么"。
+6. glossary 只收本次真正用到的术语，这些会变成用户的记忆卡片。
+
+用中文输出。`;
+
+/* =========================================================================
+   3. API 调用
+   ========================================================================= */
+const cfg = {
+  get provider()    { return localStorage.getItem('provider') || 'cpa' },
+  get cpaBaseUrl()  { return localStorage.getItem('cpa_base_url') || 'https://api.earnrmb.online' },
+  get cpaKey()      { return localStorage.getItem('cpa_key') || 'REMOVED_KEY' },
+  get cpaModel()    { return localStorage.getItem('cpa_model') || 'gemini-flash' },
+  get ollamaHost()  { return localStorage.getItem('ollama_host') || 'http://127.0.0.1:11434' },
+  get ollamaModel() { return localStorage.getItem('ollama_model') || 'qwen3.8:27b-mlx' },
+  get key()         { return localStorage.getItem('key') || '' },
+  get model()       { return localStorage.getItem('model') || 'claude-opus-5' },
+  get effort()      { return localStorage.getItem('effort') || 'medium' },
+};
+
+const JSON_TEMPLATE = JSON.stringify({
+  identification: {
+    confidence: "high | medium | low",
+    common_name_zh: "中文常用名",
+    common_name_en: "英文常用名",
+    scientific_name: "拉丁学名",
+    family_zh: "科中文名",
+    family_latin: "科拉丁名",
+    order_latin: "目拉丁名",
+    reasoning: "2-4句：从哪些可见形态特征一步步推到这个科属，检索表式推理"
+  },
+  habit: {
+    growth_form: "生活型及依据",
+    stem: "茎形态",
+    phyllotaxy: "叶序"
+  },
+  leaf: {
+    simple_or_compound: "单叶/复叶",
+    shape: "叶形",
+    margin: "叶缘",
+    venation: "叶脉",
+    apex: "叶尖",
+    base: "叶基",
+    surface: "叶面",
+    petiole_stipule: "叶柄与托叶"
+  },
+  reproductive: {
+    flower_visible: false,
+    inflorescence: "花序",
+    symmetry: "对称性",
+    perianth: "花被",
+    androecium_gynoecium: "雄蕊与雌蕊",
+    fruit: "果实"
+  },
+  diagnostic_features: [
+    { feature: "特征名称（中+英）", observation: "可见事实", significance: "分类学意义（排除了谁、指向了谁）" }
+  ],
+  lookalikes: [
+    { name: "混淆种", how_to_distinguish: "区分特征" }
+  ],
+  glossary: [
+    { term_zh: "中文术语", term_en: "英文术语", definition: "一句话定义", seen_here: "本照片中的表现" }
+  ],
+  next_observation: "下次补拍哪个部位及原因",
+  uncertainty: "本次判断的薄弱环节"
+}, null, 2);
+
+function normalizeData(raw) {
+  const d = raw || {};
+  return {
+    identification: {
+      confidence: d.identification?.confidence || 'low',
+      common_name_zh: d.identification?.common_name_zh || '无法判断',
+      common_name_en: d.identification?.common_name_en || '—',
+      scientific_name: d.identification?.scientific_name || 'Genus sp.',
+      family_zh: d.identification?.family_zh || '无法判断',
+      family_latin: d.identification?.family_latin || '—',
+      order_latin: d.identification?.order_latin || '—',
+      reasoning: d.identification?.reasoning || '无推理过程'
+    },
+    habit: {
+      growth_form: d.habit?.growth_form || '—',
+      stem: d.habit?.stem || '—',
+      phyllotaxy: d.habit?.phyllotaxy || '—'
+    },
+    leaf: {
+      simple_or_compound: d.leaf?.simple_or_compound || '—',
+      shape: d.leaf?.shape || '—',
+      margin: d.leaf?.margin || '—',
+      venation: d.leaf?.venation || '—',
+      apex: d.leaf?.apex || '—',
+      base: d.leaf?.base || '—',
+      surface: d.leaf?.surface || '—',
+      petiole_stipule: d.leaf?.petiole_stipule || '—'
+    },
+    reproductive: {
+      flower_visible: Boolean(d.reproductive?.flower_visible),
+      inflorescence: d.reproductive?.inflorescence || '未见花',
+      symmetry: d.reproductive?.symmetry || '未见花',
+      perianth: d.reproductive?.perianth || '未见花',
+      androecium_gynoecium: d.reproductive?.androecium_gynoecium || '未见',
+      fruit: d.reproductive?.fruit || '未见果'
+    },
+    diagnostic_features: Array.isArray(d.diagnostic_features) ? d.diagnostic_features.map(f => ({
+      feature: f.feature || '特征',
+      observation: f.observation || '—',
+      significance: f.significance || '—'
+    })) : [],
+    lookalikes: Array.isArray(d.lookalikes) ? d.lookalikes.map(l => ({
+      name: l.name || '—',
+      how_to_distinguish: l.how_to_distinguish || '—'
+    })) : [],
+    glossary: Array.isArray(d.glossary) ? d.glossary.map(g => ({
+      term_zh: g.term_zh || '术语',
+      term_en: g.term_en || '',
+      definition: g.definition || '—',
+      seen_here: g.seen_here || '—'
+    })) : [],
+    next_observation: d.next_observation || '—',
+    uncertainty: d.uncertainty || '—'
+  };
+}
+
+async function analyze(dataUrl, hint) {
+  const [, media, b64] = dataUrl.match(/^data:(image\/\w+);base64,(.+)$/);
+
+  // 1. CPA 代理节点 (gemini-flash / earnrmb.online)
+  if (cfg.provider === 'cpa') {
+    const baseUrl = cfg.cpaBaseUrl.replace(/\/+$/, '');
+    const promptText = hint ? `请拆解这株植物。用户补充的线索：${hint}` : '请拆解这株植物。';
+    const systemPrompt = `${SYSTEM}\n\n你必须严格输出且仅输出一个合法的 JSON 对象，不要输出任何额外的闲聊文本或 Markdown 标记。\n输出的 JSON 结构必须严格符合如下模板：\n${JSON_TEMPLATE}`;
+
+    const body = {
+      model: cfg.cpaModel,
+      max_tokens: 8192,
+      system: systemPrompt,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: media, data: b64 } },
+          { type: 'text', text: promptText }
+        ]
+      }]
+    };
+
+    let r;
+    try {
+      r = await fetch(`${baseUrl}/v1/messages`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': cfg.cpaKey,
+          'authorization': `Bearer ${cfg.cpaKey}`,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      throw new Error(`连接 CPA 代理失败 (${baseUrl}):\n${err.message}`);
+    }
+
+    if (!r.ok) {
+      const t = await r.text();
+      let msg = t;
+      try { msg = JSON.parse(t).error?.message || JSON.parse(t).message || t; } catch {}
+      throw new Error(`CPA 代理错误 HTTP ${r.status}:\n${msg}`);
+    }
+
+    const res = await r.json();
+    let text = res.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
+    if (!text) throw new Error('CPA 代理未返回文本内容。');
+
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      text = text.substring(firstBrace, lastBrace + 1);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      throw new Error(`无法解析 CPA 模型输出的 JSON:\n${text}\n\n错误: ${e.message}`);
+    }
+
+    return {
+      data: normalizeData(parsed),
+      usage: res.usage || { input_tokens: 0, output_tokens: 0 }
+    };
+  }
+
+  // 2. 本地 Ollama
+  if (cfg.provider === 'ollama') {
+    const host = cfg.ollamaHost.replace(/\/+$/, '');
+    const promptText = hint ? `请拆解这株植物。用户补充的线索：${hint}` : '请拆解这株植物。';
+    const systemPrompt = `${SYSTEM}\n\n你必须严格输出且仅输出一个合法的 JSON 对象，不要输出任何 Markdown 代码块（如 \`\`\`json 等）或额外的闲聊文本。\n输出的 JSON 结构必须严格符合如下模板：\n${JSON_TEMPLATE}`;
+
+    let r;
+    try {
+      r = await fetch(`${host}/api/chat`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          model: cfg.ollamaModel,
+          stream: false,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: promptText, images: [b64] }
+          ],
+          format: 'json'
+        })
+      });
+    } catch (err) {
+      throw new Error(`连接本地 Ollama 失败 (${host})。\n请确认 Ollama 正在运行（终端可执行: ollama serve）。\n原始错误: ${err.message}`);
+    }
+
+    if (!r.ok) {
+      const t = await r.text();
+      let msg = t;
+      try { msg = JSON.parse(t).error || JSON.parse(t).message || t; } catch {}
+      throw new Error(`Ollama 错误 HTTP ${r.status}:\n${msg}`);
+    }
+
+    const res = await r.json();
+    let text = res.message?.content || '';
+    if (!text) throw new Error('Ollama 没有返回内容。');
+
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      text = text.substring(firstBrace, lastBrace + 1);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      throw new Error(`无法解析模型输出的 JSON:\n${text}\n\n错误: ${e.message}`);
+    }
+
+    return {
+      data: normalizeData(parsed),
+      usage: {
+        input_tokens: res.prompt_eval_count || 0,
+        output_tokens: res.eval_count || 0
+      }
+    };
+  }
+
+  // 3. Anthropic 官方 API
+  const body = {
+    model: cfg.model,
+    max_tokens: 16000,
+    system: SYSTEM,
+    // effort 控制思考深度，format 强制结构化输出——两者同在 output_config 下
+    output_config: {
+      effort: cfg.effort,
+      format: { type: 'json_schema', schema: SCHEMA }
+    },
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: media, data: b64 } },
+        { type: 'text', text: hint
+            ? `请拆解这株植物。用户补充的线索：${hint}`
+            : '请拆解这株植物。' }
+      ]
+    }]
+  };
+
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': cfg.key,
+      'anthropic-version': '2023-06-01',
+      // 没有这一行浏览器直连会被 CORS 拒绝
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!r.ok) {
+    const t = await r.text();
+    let msg = t;
+    try { msg = JSON.parse(t).error.message } catch {}
+    throw new Error(`HTTP ${r.status}\n${msg}`);
+  }
+
+  const res = await r.json();
+  if (res.stop_reason === 'refusal') throw new Error('模型拒绝了这次请求。换一张照片试试。');
+  if (res.stop_reason === 'max_tokens') throw new Error('输出被 max_tokens 截断，结果不完整。');
+
+  // 思考块在前，正文在后 —— 取第一个 text 块
+  const text = res.content.find(b => b.type === 'text')?.text;
+  if (!text) throw new Error('响应中没有文本内容。');
+  return { data: normalizeData(JSON.parse(text)), usage: res.usage };
+}
+
+/* =========================================================================
+   4. 图片处理：等比缩到长边 2048（Opus 5 支持高分辨率，2048 是精度/成本的折中）
+   ========================================================================= */
+function toDataUrl(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 2048;
+        const k = Math.min(1, MAX / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k);
+        c.height = Math.round(img.height * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = rej;
+      img.src = fr.result;
+    };
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+
+/* =========================================================================
+   5. 渲染
+   ========================================================================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CONF = { high:['高','' ], medium:['中','med'], low:['低','low'] };
+
+function renderResult(d, quiz) {
+  const [ct, cc] = CONF[d.identification.confidence] || ['?',''];
+  const id = d.identification;
+
+  const dl = obj => `<dl class="grid">${Object.entries(obj)
+    .map(([k,v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
+
+  return `
+  <div class="card veil ${quiz ? 'hidden' : ''}" id="idcard">
+    <div class="veil-body">
+      <div class="spread">
+        <div>
+          <div style="font-size:22px;font-weight:650">${esc(id.common_name_zh)}</div>
+          <div class="sci muted">${esc(id.scientific_name)} · ${esc(id.common_name_en)}</div>
+        </div>
+        <span class="pill ${cc}">把握 ${ct}</span>
+      </div>
+      <div style="margin-top:8px" class="tiny muted">
+        ${esc(id.order_latin)} → <b>${esc(id.family_zh)} ${esc(id.family_latin)}</b>
+      </div>
+      <p style="margin:14px 0 0">${esc(id.reasoning)}</p>
+    </div>
+    <div class="reveal" onclick="this.parentNode.classList.remove('hidden')">
+      <button class="ghost">先自己看完特征 → 点这里揭晓名字</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">鉴别特征 Diagnostic features</div>
+    ${d.diagnostic_features.map(f => `
+      <div class="feat">
+        <b>${esc(f.feature)}</b>
+        <div class="obs">${esc(f.observation)}</div>
+        <div class="why">→ ${esc(f.significance)}</div>
+      </div>`).join('')}
+
+    <div class="sec-title">习性与茎叶 Habit</div>
+    ${dl({'生活型':d.habit.growth_form,'茎':d.habit.stem,'叶序':d.habit.phyllotaxy})}
+
+    <div class="sec-title">叶 Leaf</div>
+    ${dl({'单叶/复叶':d.leaf.simple_or_compound,'叶形':d.leaf.shape,'叶缘':d.leaf.margin,
+          '叶脉':d.leaf.venation,'叶尖':d.leaf.apex,'叶基':d.leaf.base,
+          '叶面':d.leaf.surface,'叶柄/托叶':d.leaf.petiole_stipule})}
+
+    <div class="sec-title">花与果 Reproductive</div>
+    ${dl({'花序':d.reproductive.inflorescence,'对称性':d.reproductive.symmetry,
+          '花被':d.reproductive.perianth,'雄蕊/雌蕊':d.reproductive.androecium_gynoecium,
+          '果实':d.reproductive.fruit})}
+
+    <div class="sec-title">易混淆 Lookalikes</div>
+    ${d.lookalikes.map(l => `<div class="feat"><b>${esc(l.name)}</b>
+      <div class="why">区分点：${esc(l.how_to_distinguish)}</div></div>`).join('')}
+
+    <div class="sec-title">下一步观察</div>
+    <p style="margin:0 0 12px">${esc(d.next_observation)}</p>
+    <p class="tiny muted" style="margin:0">⚠ ${esc(d.uncertainty)}</p>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">本次沉淀的术语（已加入卡片库）</div>
+    ${d.glossary.map(g => `<div class="feat">
+        <b>${esc(g.term_zh)} <span class="muted sci" style="font-weight:400">${esc(g.term_en)}</span></b>
+        <div class="obs">${esc(g.definition)}</div>
+        <div class="why">本例：${esc(g.seen_here)}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+/* =========================================================================
+   6. 观察流程
+   ========================================================================= */
+let pending = null;   // 当前待分析的 dataURL
+
+async function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  pending = await toDataUrl(file);
+  $('#preview').src = pending;
+  $('#preview').hidden = false;
+  $('#drop-hint').hidden = true;
+  $('#go').disabled = false;
+}
+
+$('#drop').onclick = () => $('#file').click();
+$('#file').onchange = e => loadFile(e.target.files[0]);
+['dragover','dragenter'].forEach(ev =>
+  $('#drop').addEventListener(ev, e => { e.preventDefault(); $('#drop').classList.add('hot'); }));
+['dragleave','drop'].forEach(ev =>
+  $('#drop').addEventListener(ev, e => { e.preventDefault(); $('#drop').classList.remove('hot'); }));
+$('#drop').addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+document.addEventListener('paste', e => {
+  const it = [...e.clipboardData.items].find(i => i.type.startsWith('image/'));
+  if (it) loadFile(it.getAsFile());
+});
+
+$('#go').onclick = async () => {
+  if (cfg.provider === 'cpa' && !cfg.cpaKey) {
+    $('#err-box').innerHTML = `
+      <div class="err">
+        <b>当前处于 CPA 代理模式，但未配置 API Token。</b><br>
+        <div class="row" style="margin-top:8px">
+          <button class="ghost" style="font-size:13px;padding:6px 12px" onclick="show('set')">前往设置填写 Key</button>
+          <button class="ghost" style="font-size:13px;padding:6px 12px" onclick="switchToOllama()">切换为本地 Ollama</button>
+        </div>
+      </div>`;
+    return;
+  }
+  if (cfg.provider === 'anthropic' && !cfg.key) {
+    $('#err-box').innerHTML = `
+      <div class="err">
+        <b>当前处于 Anthropic 官方 API 模式，但未配置 API Key。</b><br>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" style="font-size:13px;padding:6px 12px" onclick="switchToCpa()">一键切换为 CPA 节点 (gemini-flash)</button>
+          <button class="ghost" style="font-size:13px;padding:6px 12px" onclick="switchToOllama()">切换为本地 Ollama</button>
+          <button class="ghost" style="font-size:13px;padding:6px 12px" onclick="show('set')">去设置填写 Key</button>
+        </div>
+      </div>`;
+    return;
+  }
+  $('#err-box').innerHTML = '';
+  $('#go').disabled = true;
+  const currentModel = cfg.provider === 'cpa' ? cfg.cpaModel : (cfg.provider === 'ollama' ? cfg.ollamaModel : cfg.model);
+  $('#status').innerHTML = `<span class="spin"></span> 正在观察…（${esc(currentModel)} 分析中）`;
+
+  try {
+    const t0 = Date.now();
+    const { data, usage } = await analyze(pending, $('#hint').value.trim());
+    const entry = {
+      id: Date.now(),
+      img: pending,
+      hint: $('#hint').value.trim(),
+      data,
+      at: new Date().toISOString()
+    };
+    await DB.put('entries', entry);
+    await addCards(data.glossary, entry.id);
+
+    $('#result').innerHTML = renderResult(data, $('#quiz').checked);
+    $('#status').textContent =
+      `完成 · ${((Date.now()-t0)/1000).toFixed(0)}s · in ${usage.input_tokens} / out ${usage.output_tokens} tokens`;
+    refreshBook(); refreshDeck();
+  } catch (e) {
+    $('#err-box').innerHTML = `<div class="err">${esc(e.message)}</div>`;
+    $('#status').textContent = '';
+  }
+  $('#go').disabled = false;
+};
+
+/* =========================================================================
+   7. 笔记本
+   ========================================================================= */
+async function refreshBook() {
+  const all = (await DB.all('entries')).sort((a,b) => b.id - a.id);
+  const fams = new Set(all.map(e => e.data.identification.family_latin).filter(f => f && f !== '无法判断'));
+  const cards = await DB.all('cards');
+
+  $('#stats').innerHTML = `
+    <div><b>${all.length}</b><span>观察记录</span></div>
+    <div><b>${fams.size}</b><span>见过的科</span></div>
+    <div><b>${cards.length}</b><span>术语卡片</span></div>
+    <div><b>${cards.filter(c => c.due <= Date.now()).length}</b><span>今日待复习</span></div>`;
+
+  $('#notes').innerHTML = all.map(e => `
+    <div class="note" data-id="${e.id}">
+      <img src="${e.img}">
+      <div>
+        <b>${esc(e.data.identification.common_name_zh)}</b>
+        <span class="tiny muted">${esc(e.data.identification.family_zh)} · ${e.at.slice(0,10)}</span>
+      </div>
+    </div>`).join('') || '<p class="muted">还没有记录。</p>';
+
+  $('#notes').querySelectorAll('.note').forEach(n => n.onclick = async () => {
+    const e = (await DB.all('entries')).find(x => x.id == n.dataset.id);
+    $('#detail').innerHTML =
+      `<div class="card"><div class="spread">
+         <b>${esc(e.data.identification.common_name_zh)}</b>
+         <button class="ghost" id="del">删除这条</button></div>
+       <img src="${e.img}" style="max-width:100%;border-radius:8px;margin-top:12px">
+       ${e.hint ? `<p class="tiny muted">线索：${esc(e.hint)}</p>` : ''}
+       </div>` + renderResult(e.data, false);
+    $('#del').onclick = async () => { await DB.del('entries', e.id); $('#detail').innerHTML=''; refreshBook(); };
+    $('#detail').scrollIntoView({behavior:'smooth'});
+  });
+}
+
+/* =========================================================================
+   8. 术语卡 + 间隔重复（SM-2 简化版）
+   ========================================================================= */
+async function addCards(glossary, entryId) {
+  const existing = new Set((await DB.all('cards')).map(c => c.term));
+  for (const g of glossary) {
+    if (existing.has(g.term_zh)) continue;
+    await DB.put('cards', {
+      term: g.term_zh, en: g.term_en, def: g.definition, seen: g.seen_here,
+      entryId, ease: 2.5, interval: 0, due: Date.now(), reps: 0
+    });
+  }
+}
+
+/* ---- SVG 示意图库：形态特征线描 ---- */
+const F = (b, vb='0 0 100 100') => `<svg viewBox="${vb}" class="fig" xmlns="http://www.w3.org/2000/svg">${b}</svg>`;
+const GROUND = '<path class="thin dash" d="M6,88 H94"/>';
+const LF = (cx,cy,rx,ry,rot) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" transform="rotate(${rot} ${cx} ${cy})"/>`;
+
+const FIG = {
+/* ===== 习性与茎 ===== */
+'草本': F(`${GROUND}<path d="M50,88 C50,70 48,50 50,26"/>
+  <path d="M50,72 C38,68 32,60 30,52"/><path d="M50,58 C62,54 68,46 70,38"/>
+  <path d="M50,44 C40,40 35,34 33,27"/>${LF(28,50,9,4.5,-25)}${LF(72,36,9,4.5,25)}${LF(31,25,8,4,-25)}
+  <path class="thin" d="M50,88 C46,94 44,96 42,98 M50,88 C54,94 56,96 58,98"/>`),
+'灌木': F(`${GROUND}<path d="M50,88 C46,74 34,60 24,44 M50,88 C50,68 50,52 50,34 M50,88 C56,72 68,60 76,44 M50,88 C58,76 64,70 70,62"/>
+  ${LF(23,41,8,4,-55)}${LF(50,31,8,4,0)}${LF(78,41,8,4,55)}${LF(72,59,7,3.5,45)}${LF(34,62,7,3.5,-45)}`),
+'乔木': F(`${GROUND}<path d="M46,88 L47,52 M54,88 L53,52"/><path d="M50,56 L30,38 M50,50 L70,34 M50,44 L38,28 M50,40 L62,26"/>
+  <path d="M50,26 C24,26 14,44 26,54 C22,66 40,72 50,64 C60,72 78,66 74,54 C86,44 76,26 50,26 Z" class="thin"/>`),
+'藤本': F(`<path class="thin" d="M76,94 V10"/>${GROUND}
+  <path d="M40,90 C60,84 82,80 70,70 C56,60 84,58 74,48 C60,40 86,36 74,26 C64,18 72,16 76,14"/>
+  ${LF(46,74,8,4,-20)}${LF(50,52,8,4,-20)}${LF(52,30,8,4,-20)}`),
+'匍匐茎': F(`${GROUND}<path d="M12,88 H88"/>
+  <circle cx="38" cy="88" r="2.4" class="fill"/><circle cx="68" cy="88" r="2.4" class="fill"/>
+  <path d="M38,88 V72 M68,88 V70"/>${LF(31,68,8,4,-25)}${LF(45,68,8,4,25)}${LF(61,66,8,4,-25)}${LF(75,66,8,4,25)}
+  <path class="thin" d="M38,88 C36,94 34,96 33,98 M38,88 C40,94 42,96 43,98 M68,88 C66,94 64,96 63,98 M68,88 C70,94 72,96 73,98"/>`),
+'根状茎': F(`${GROUND}<path d="M14,66 H86"/>
+  <path class="thin" d="M34,60 L34,72 M58,60 L58,72"/>
+  <path d="M34,66 V44 M58,66 V40 M78,66 V48"/>${LF(34,40,7,3.5,0)}${LF(58,36,7,3.5,0)}${LF(78,44,7,3.5,0)}
+  <path class="thin" d="M22,66 C20,74 18,80 16,84 M46,66 C44,76 42,82 40,86 M70,66 C68,76 66,82 64,86 M86,66 C86,74 84,80 82,84"/>`),
+'四棱茎': F(`<rect x="18" y="26" width="46" height="46" rx="4"/><path class="thin" d="M18,26 L34,14 H80 L64,26 M80,14 V60 L64,72"/>
+  <path class="thin dash" d="M41,49 H8 M41,49 V88"/><text x="4" y="45">棱</text>`),
+'节与节间': F(`<path d="M50,94 V12"/><path stroke-width="2.6" d="M40,72 H60 M40,40 H60"/>
+  ${LF(30,68,10,5,-25)}${LF(70,36,10,5,25)}
+  <path class="thin dash" d="M62,72 H84 M62,40 H84"/><path class="thin" d="M80,72 V40"/>
+  <text x="66" y="34">节</text><text x="72" y="60">节间</text>`),
+
+/* ===== 叶序 ===== */
+'互生': F(`<path d="M50,96 V10"/>${LF(30,82,15,6.5,-20)}${LF(70,64,15,6.5,20)}${LF(30,46,15,6.5,-20)}${LF(70,28,15,6.5,20)}
+  <circle cx="50" cy="82" r="1.8" class="fill"/><circle cx="50" cy="64" r="1.8" class="fill"/><circle cx="50" cy="46" r="1.8" class="fill"/><circle cx="50" cy="28" r="1.8" class="fill"/>`),
+'对生': F(`<path d="M50,96 V10"/>${LF(30,76,15,6.5,-15)}${LF(70,76,15,6.5,15)}${LF(30,42,15,6.5,-15)}${LF(70,42,15,6.5,15)}
+  <circle cx="50" cy="76" r="1.8" class="fill"/><circle cx="50" cy="42" r="1.8" class="fill"/>`),
+'交互对生': F(`<text x="8" y="14">侧视</text><path d="M28,96 V22"/>${LF(14,74,12,5,-15)}${LF(42,74,12,5,15)}
+  <path class="thin" d="M28,44 h0"/><circle cx="28" cy="44" r="7" /><circle cx="28" cy="74" r="1.8" class="fill"/>
+  <text x="60" y="14">俯视</text><path class="thin" d="M74,44 v0"/>
+  ${LF(74,26,5,12,0)}${LF(74,62,5,12,0)}${LF(56,44,12,5,0)}${LF(92,44,12,5,0)}<circle cx="74" cy="44" r="2.4" class="fill"/>`),
+'轮生': F(`<path d="M50,96 V14"/>${LF(28,70,14,6,-18)}${LF(72,70,14,6,18)}${LF(50,84,6,13,0)}
+  ${LF(28,38,14,6,-18)}${LF(72,38,14,6,18)}${LF(50,52,6,13,0)}
+  <circle cx="50" cy="70" r="1.8" class="fill"/><circle cx="50" cy="38" r="1.8" class="fill"/>`),
+'簇生': F(`<path d="M50,96 V60"/><path stroke-width="2.6" d="M43,60 H57"/>
+  <path d="M50,60 C34,46 26,32 24,20 M50,60 C40,44 36,28 36,16 M50,60 C50,42 50,28 50,14 M50,60 C60,44 64,28 64,16 M50,60 C66,46 74,32 76,20"/>`),
+'基生叶': F(`<circle cx="50" cy="50" r="3" class="fill"/><path d="M50,50 V16"/>
+  ${LF(50,26,9,20,0)}${LF(73,33,9,20,55)}${LF(80,57,9,20,110)}${LF(62,76,9,20,160)}${LF(38,76,9,20,-160)}${LF(20,57,9,20,-110)}${LF(27,33,9,20,-55)}`),
+};
+/* ===== 叶的组成 ===== */
+const P = (d) => `<path d="${d}"/>`;
+const BLADE = (d) => `<path class="fill" d="${d}"/><path d="${d}"/>`;
+Object.assign(FIG, {
+'单叶': F(`<path d="M18,96 V8"/><path d="M18,58 L38,50"/>
+  ${BLADE('M38,50 C52,28 76,26 86,34 C80,54 58,64 38,50 Z')}<path class="thin" d="M38,50 L84,35"/>
+  <circle cx="21" cy="53" r="3" class="fill"/><text x="26" y="76">腋芽</text><path class="thin" d="M24,72 L22,58"/>`),
+'复叶': F(`<path d="M14,96 V8"/><path d="M14,56 L88,40"/>
+  ${LF(28,40,9,4.5,-20)}${LF(34,66,9,4.5,20)}${LF(50,36,9,4.5,-20)}${LF(56,62,9,4.5,20)}${LF(72,32,9,4.5,-20)}${LF(78,58,9,4.5,20)}${LF(90,32,9,4.5,-10)}
+  <circle cx="17" cy="51" r="3" class="fill"/><path class="thin" d="M36,44 l6,6 M42,44 l-6,6"/><path class="thin" d="M58,40 l6,6 M64,40 l-6,6"/>
+  <text x="6" y="80">柄基有芽</text><text x="40" y="82">小叶腋无芽</text>`),
+'羽状复叶': F(`<path d="M50,96 V12"/><path d="M50,74 L28,62 M50,74 L72,62 M50,58 L28,46 M50,58 L72,46 M50,42 L28,30 M50,42 L72,30"/>
+  ${LF(22,60,11,5,-25)}${LF(78,60,11,5,25)}${LF(22,44,11,5,-25)}${LF(78,44,11,5,25)}${LF(22,28,11,5,-25)}${LF(78,28,11,5,25)}${LF(50,20,5,11,0)}
+  <text x="58" y="16">顶小叶</text>`),
+'掌状复叶': F(`<path d="M50,96 V58"/>
+  <path d="M50,58 L20,34 M50,58 L34,20 M50,58 L50,14 M50,58 L66,20 M50,58 L80,34"/>
+  ${LF(18,31,10,5,-40)}${LF(32,17,5,10,-20)}${LF(50,12,5,11,0)}${LF(68,17,5,10,20)}${LF(82,31,10,5,40)}`),
+'三出复叶': F(`<path d="M50,96 V54"/><path d="M50,54 L26,38 M50,54 L74,38"/>
+  ${LF(22,34,11,6,-35)}${LF(78,34,11,6,35)}${LF(50,34,6,13,0)}`),
+'二回羽状复叶': F(`<path d="M50,96 V16"/><path d="M50,72 L22,58 M50,72 L78,58 M50,50 L22,36 M50,50 L78,36 M50,32 L28,22 M50,32 L72,22"/>
+  <g class="thin">
+  <path d="M27,60 l-4,-7 M33,63 l-4,-7 M39,65 l-4,-7 M45,68 l-4,-7 M27,60 l4,7 M33,63 l4,7 M39,65 l4,7 M45,68 l4,7"/>
+  <path d="M73,60 l4,-7 M67,63 l4,-7 M61,65 l4,-7 M55,68 l4,-7 M73,60 l-4,7 M67,63 l-4,7 M61,65 l-4,7 M55,68 l-4,7"/>
+  <path d="M27,38 l-4,-7 M33,41 l-4,-7 M39,43 l-4,-7 M45,46 l-4,-7 M27,38 l4,7 M33,41 l4,7 M39,43 l4,7 M45,46 l4,7"/>
+  <path d="M73,38 l4,-7 M67,41 l4,-7 M61,43 l4,-7 M55,46 l4,-7 M73,38 l-4,7 M67,41 l-4,7 M61,43 l-4,7 M55,46 l-4,7"/></g>`),
+'托叶': F(`<path d="M22,96 V10"/><path d="M22,60 L54,44"/>
+  ${BLADE('M54,44 C66,24 88,22 96,30 C90,48 70,58 54,44 Z')}
+  <path class="fill" d="M22,60 C14,52 12,42 16,36 C24,40 26,52 22,60 Z"/><path d="M22,60 C14,52 12,42 16,36 C24,40 26,52 22,60 Z"/>
+  <path class="fill" d="M22,60 C30,54 40,52 44,56 C38,64 28,66 22,60 Z"/><path d="M22,60 C30,54 40,52 44,56 C38,64 28,66 22,60 Z"/>
+  <text x="4" y="84">托叶（一对）</text><path class="thin" d="M20,78 L20,64 M40,78 L36,64"/>`),
+'托叶鞘': F(`<path d="M50,96 V10"/>
+  <path class="fill" d="M38,58 C38,48 62,48 62,58 L62,72 C62,76 38,76 38,72 Z"/>
+  <path d="M38,58 C38,48 62,48 62,58 L62,72 C62,76 38,76 38,72 Z"/>
+  <path class="thin" d="M42,60 V74 M50,59 V75 M58,60 V74"/>
+  <path d="M50,54 L74,42"/>${LF(80,39,10,5,25)}
+  <text x="4" y="88">膜质鞘抱茎</text><path class="thin" d="M30,82 L38,70"/>`),
+'叶鞘与叶舌': F(`<path d="M50,96 V70"/>
+  <path class="fill" d="M40,70 L40,44 C40,40 60,40 60,44 L60,70 Z"/><path d="M40,70 L40,44 C40,40 60,40 60,44 L60,70 Z"/>
+  <path class="thin" d="M44,68 V46 M56,68 V46"/>
+  <path stroke-width="2.4" d="M41,43 C46,38 54,38 59,43"/>
+  <path d="M42,44 C34,30 30,18 30,8 M58,44 C66,30 70,18 70,8"/>
+  <text x="2" y="30">叶舌</text><path class="thin" d="M22,26 L39,41"/>
+  <text x="66" y="82">叶鞘</text><path class="thin" d="M70,76 L58,64"/>`),
+
+/* ===== 叶形 ===== */
+'卵形': F(`${BLADE('M50,8 C74,26 80,58 50,88 C20,58 26,26 50,8 Z')}<path class="thin" d="M50,88 V12"/><path d="M50,88 V99"/>`),
+'披针形': F(`${BLADE('M50,4 C62,28 66,58 50,88 C34,58 38,28 50,4 Z')}<path class="thin" d="M50,88 V8"/><path d="M50,88 V99"/>`),
+'椭圆形': F(`${BLADE('M50,10 C78,30 78,66 50,88 C22,66 22,30 50,10 Z')}<path class="thin" d="M50,88 V14"/><path d="M50,88 V99"/>`),
+'心形': F(`${BLADE('M50,8 C80,28 88,62 54,84 C52,80 51,74 50,66 C49,74 48,80 46,84 C12,62 20,28 50,8 Z')}
+  <path class="thin" d="M50,66 V12"/><path d="M50,66 V99"/>`),
+'肾形': F(`${BLADE('M18,44 C22,20 78,20 82,44 C90,66 70,80 50,70 C30,80 10,66 18,44 Z')}
+  <path class="thin" d="M50,70 L30,36 M50,70 L50,30 M50,70 L70,36"/><path d="M50,70 V96"/>`),
+'线形': F(`${BLADE('M50,4 C57,28 57,66 50,90 C43,66 43,28 50,4 Z')}<path class="thin" d="M50,90 V8"/><path d="M50,90 V99"/>`),
+'盾形': F(`${BLADE('M50,52 m-40,0 a40,36 0 1,0 80,0 a40,36 0 1,1 -80,0')}
+  <g class="thin"><path d="M50,52 L50,16 M50,52 L80,32 M50,52 L88,58 M50,52 L70,84 M50,52 L30,84 M50,52 L12,58 M50,52 L20,32"/></g>
+  <circle cx="50" cy="52" r="2.6" class="fill"/><path class="dash" d="M50,52 V88"/><path d="M50,88 V99"/>
+  <text x="56" y="98">柄接叶背中央</text>`),
+'箭形与戟形': F(`<text x="6" y="12">箭形</text>${BLADE('M26,16 C38,34 44,52 42,90 L26,74 L10,90 C8,52 14,34 26,16 Z')}
+  <text x="62" y="12">戟形</text>${BLADE('M76,16 C86,36 88,50 86,62 L98,74 L76,72 L54,74 L66,62 C64,50 66,36 76,16 Z')}`),
+'掌状分裂': F(`${BLADE('M50,86 C40,78 36,66 34,58 C24,60 14,58 8,52 C18,46 28,42 34,42 C30,34 26,22 26,12 C36,18 44,26 48,34 C52,24 58,14 66,8 C68,20 66,32 62,42 C70,40 82,40 92,44 C84,52 74,58 64,60 C62,68 58,78 50,86 Z')}
+  <g class="thin"><path d="M50,86 L48,34 M50,74 L20,50 M50,74 L80,50 M50,62 L34,20 M50,62 L64,18"/></g><path d="M50,86 V99"/>`),
+});
+/* ===== 叶缘（边缘特写，右为叶尖方向） ===== */
+const EDGE = (d) => F(`<path class="fill" d="${d} L92,46 L8,46 Z"/><path d="${d}"/>
+  <path class="thin dash" d="M8,44 H92"/><text x="66" y="12">→ 叶尖</text>`, '0 0 100 50');
+Object.assign(FIG, {
+'全缘': EDGE('M8,30 C30,25 70,25 92,30'),
+'锯齿': EDGE('M8,30 L20,15 L22,30 L34,15 L36,30 L48,15 L50,30 L62,15 L64,30 L76,15 L78,30 L90,15 L92,30'),
+'重锯齿': EDGE('M8,30 L15,21 L17,26 L26,13 L28,30 L35,21 L37,26 L46,13 L48,30 L55,21 L57,26 L66,13 L68,30 L75,21 L77,26 L86,13 L88,30'),
+'牙齿状': EDGE('M8,30 L18,14 L28,30 L38,14 L48,30 L58,14 L68,30 L78,14 L88,30 L92,26'),
+'圆齿': EDGE('M8,30 Q18,10 28,30 Q38,10 48,30 Q58,10 68,30 Q78,10 88,30'),
+'波状': EDGE('M8,28 Q22,12 36,26 Q50,38 64,24 Q78,10 92,24'),
+'缘毛': F(`<path class="fill" d="M8,30 C30,26 70,26 92,30 L92,46 L8,46 Z"/><path d="M8,30 C30,26 70,26 92,30"/>
+  <g class="thin"><path d="M12,29 L9,17 M20,28 L18,15 M28,27 L27,14 M36,27 L36,13 M44,26 L45,13 M52,26 L53,13 M60,26 L62,13 M68,27 L71,14 M76,27 L79,15 M84,28 L88,16"/></g>`, '0 0 100 50'),
+
+/* ===== 叶脉 ===== */
+'网状脉': F(`${BLADE('M50,8 C78,28 78,68 50,90 C22,68 22,28 50,8 Z')}<path class="thin" d="M50,90 V10"/>
+  <g class="thin"><path d="M50,78 C40,74 32,68 27,60 M50,78 C60,74 68,68 73,60 M50,62 C40,58 32,52 27,44 M50,62 C60,58 68,52 73,44 M50,46 C42,42 36,36 32,30 M50,46 C58,42 64,36 68,30 M50,30 C45,27 41,23 38,19 M50,30 C55,27 59,23 62,19"/>
+  <path d="M36,70 C42,64 42,58 38,53 M64,70 C58,64 58,58 62,53 M34,54 C40,49 41,43 38,38 M66,54 C60,49 59,43 62,38 M42,74 C46,68 46,62 43,57 M58,74 C54,68 54,62 57,57"/></g>`),
+'羽状脉': F(`${BLADE('M50,8 C76,28 76,68 50,90 C24,68 24,28 50,8 Z')}<path d="M50,90 V10"/>
+  <g class="thin"><path d="M50,80 C40,75 31,68 26,58 M50,80 C60,75 69,68 74,58 M50,64 C40,59 31,52 26,42 M50,64 C60,59 69,52 74,42 M50,48 C42,44 35,38 31,30 M50,48 C58,44 65,38 69,30 M50,32 C45,29 40,25 37,20 M50,32 C55,29 60,25 63,20"/></g><path d="M50,90 V99"/>`),
+'掌状脉': F(`${BLADE('M50,84 C36,76 22,62 16,44 C28,34 42,26 50,10 C58,26 72,34 84,44 C78,62 64,76 50,84 Z')}
+  <path d="M50,84 L50,14 M50,80 L20,44 M50,80 L80,44 M50,72 L28,26 M50,72 L72,26"/>
+  <g class="thin"><path d="M38,64 C42,58 42,50 38,44 M62,64 C58,58 58,50 62,44 M34,52 C39,46 40,38 37,32 M66,52 C61,46 60,38 63,32"/></g><path d="M50,84 V99"/>`),
+'平行脉': F(`${BLADE('M50,4 C62,30 62,70 50,94 C38,70 38,30 50,4 Z')}
+  <g class="thin"><path d="M50,94 C56,70 56,30 50,6 M50,94 C61,70 61,32 50,8 M50,94 C44,70 44,30 50,6 M50,94 C39,70 39,32 50,8 M50,94 C58,70 58,30 50,7 M50,94 C42,70 42,30 50,7"/></g>`),
+'弧形脉': F(`${BLADE('M50,10 C80,32 80,68 50,90 C20,68 20,32 50,10 Z')}
+  <path class="thin" d="M50,90 V10"/>
+  <g class="thin"><path d="M50,88 C30,68 28,36 50,12 M50,88 C70,68 72,36 50,12 M50,88 C38,70 37,40 50,13 M50,88 C62,70 63,40 50,13"/></g>`),
+'叉状脉': F(`${BLADE('M50,88 C30,80 12,60 10,34 C30,24 70,24 90,34 C88,60 70,80 50,88 Z')}
+  <g class="thin"><path d="M50,88 L34,42 M34,42 L26,28 M34,42 L38,26 M50,88 L50,40 M50,40 L45,26 M50,40 L55,26 M50,88 L66,42 M66,42 L62,26 M66,42 L74,28 M50,88 L22,50 M22,50 L14,32 M50,88 L78,50 M78,50 L86,32"/></g><path d="M50,88 V99"/>`),
+
+/* ===== 叶尖与叶基 ===== */
+'渐尖': F(`<path class="fill" d="M50,6 C56,26 62,40 68,60 L32,60 C38,40 44,26 50,6 Z"/>
+  <path d="M50,6 C56,26 62,40 68,60 M50,6 C44,26 38,40 32,60"/><path class="thin" d="M50,60 V10"/>
+  <text x="4" y="20">先端渐狭</text><text x="4" y="30">边缘内凹</text>`, '0 0 100 66'),
+'急尖': F(`<path class="fill" d="M50,8 C60,26 64,42 68,60 L32,60 C36,42 40,26 50,8 Z"/>
+  <path d="M50,8 C60,26 64,42 68,60 M50,8 C40,26 36,42 32,60"/><path class="thin" d="M50,60 V12"/>
+  <path class="thin dash" d="M50,8 L34,32 M50,8 L66,32"/><text x="56" y="22">锐角</text>`, '0 0 100 66'),
+'钝形': F(`<path class="fill" d="M50,12 C64,16 68,36 70,60 L30,60 C32,36 36,16 50,12 Z"/>
+  <path d="M50,12 C64,16 68,36 70,60 M50,12 C36,16 32,36 30,60"/><path class="thin" d="M50,60 V16"/>
+  <text x="56" y="14">钝角</text>`, '0 0 100 66'),
+'微凹': F(`<path class="fill" d="M38,14 C46,20 50,22 50,26 C50,22 54,20 62,14 C70,26 72,44 72,60 L28,60 C28,44 30,26 38,14 Z"/>
+  <path d="M38,14 C46,20 50,22 50,26 C50,22 54,20 62,14 C70,26 72,44 72,60 M38,14 C30,26 28,44 28,60"/>
+  <path class="thin" d="M50,60 V26"/><text x="56" y="12">浅凹缺</text>`, '0 0 100 66'),
+'尾尖': F(`<path class="fill" d="M50,4 C51,20 52,28 56,34 C62,42 66,50 68,60 L32,60 C34,50 38,42 44,34 C48,28 49,20 50,4 Z"/>
+  <path d="M50,4 C51,20 52,28 56,34 C62,42 66,50 68,60 M50,4 C49,20 48,28 44,34 C38,42 34,50 32,60"/>
+  <path class="thin" d="M50,60 V8"/><text x="56" y="16">细长尾状</text>`, '0 0 100 66'),
+'叶基偏斜': F(`<path class="fill" d="M50,0 C34,10 22,26 14,44 L50,58 C74,50 84,32 86,16 C74,10 62,4 50,0 Z"/>
+  <path d="M50,0 C34,10 22,26 14,44 M50,0 C74,6 84,10 86,16 C84,32 74,50 50,58"/>
+  <path d="M14,44 L50,58 L86,16"/><path class="thin" d="M50,58 V4"/><path d="M50,58 L54,70"/>
+  <path class="thin dash" d="M50,58 L14,44 M50,58 L86,16"/><text x="4" y="66">左低</text><text x="72" y="66">右高</text>`, '0 0 100 74'),
+'楔形基': F(`<path class="fill" d="M50,58 C58,42 66,24 74,4 L26,4 C34,24 42,42 50,58 Z"/>
+  <path d="M50,58 C58,42 66,24 74,4 M50,58 C42,42 34,24 26,4"/><path class="thin" d="M50,58 V6"/>
+  <path d="M50,58 V72"/><text x="56" y="50">逐渐变狭</text>`, '0 0 100 74'),
+'抱茎': F(`<path d="M50,74 V4"/>
+  <path class="fill" d="M50,40 C40,32 24,30 8,34 C18,46 34,52 50,48 Z"/><path d="M50,40 C40,32 24,30 8,34 C18,46 34,52 50,48 Z"/>
+  <path class="fill" d="M50,40 C60,32 76,30 92,34 C82,46 66,52 50,48 Z"/><path d="M50,40 C60,32 76,30 92,34 C82,46 66,52 50,48 Z"/>
+  <path class="thin dash" d="M50,40 C46,44 46,46 50,48 M50,40 C54,44 54,46 50,48"/>
+  <text x="18" y="66">叶基无柄环抱茎</text>`, '0 0 100 74'),
+});
+/* ===== 花序 ===== */
+const FL = (x,y,r=4.5) => `<circle cx="${x}" cy="${y}" r="${r}" class="fill"/><circle cx="${x}" cy="${y}" r="${r}"/>`;
+Object.assign(FIG, {
+'总状花序': F(`<path d="M50,98 V12"/>
+  <path d="M50,80 L28,74 M50,80 L72,74 M50,62 L30,56 M50,62 L70,56 M50,46 L33,41 M50,46 L67,41 M50,32 L37,28 M50,32 L63,28"/>
+  ${FL(24,73,6)}${FL(76,73,6)}${FL(26,55,5.5)}${FL(74,55,5.5)}${FL(30,40,4.5)}${FL(70,40,4.5)}${FL(35,27,3.5)}${FL(65,27,3.5)}${FL(50,16,3)}
+  <text x="2" y="94">下部先开</text>`),
+'穗状花序': F(`<path d="M50,98 V12"/>
+  ${FL(40,80,7)}${FL(60,80,7)}${FL(41,64,6)}${FL(59,64,6)}${FL(42,50,5)}${FL(58,50,5)}${FL(44,38,4)}${FL(56,38,4)}${FL(46,28,3)}${FL(54,28,3)}
+  <text x="2" y="94">花无梗</text>`),
+'柔荑花序': F(`<path d="M46,6 C58,26 60,50 52,94"/>
+  ${FL(38,18,5)}${FL(56,20,5)}${FL(42,32,5.5)}${FL(62,34,5.5)}${FL(44,46,5.5)}${FL(64,48,5.5)}${FL(43,60,5.5)}${FL(63,62,5.5)}${FL(42,74,5)}${FL(60,76,5)}${FL(44,88,4.5)}${FL(58,90,4.5)}
+  <text x="4" y="12">下垂 · 单性</text>`),
+'伞房花序': F(`<path d="M50,98 V28"/>
+  <path d="M50,82 C34,80 22,58 20,36 M50,70 C38,66 32,52 31,36 M50,56 C44,50 42,44 42,36 M50,82 C66,80 78,58 80,36 M50,70 C62,66 68,52 69,36 M50,56 C56,50 58,44 58,36"/>
+  ${FL(20,32)}${FL(31,32)}${FL(42,32)}${FL(50,26)}${FL(58,32)}${FL(69,32)}${FL(80,32)}
+  <path class="thin dash" d="M8,26 H92"/><text x="4" y="18">近同一平面</text>`),
+'伞形花序': F(`<path d="M50,98 V56"/>
+  <path d="M50,56 L16,26 M50,56 L28,20 M50,56 L42,16 M50,56 L58,16 M50,56 L72,20 M50,56 L84,26"/>
+  ${FL(14,23)}${FL(26,17)}${FL(41,13)}${FL(59,13)}${FL(74,17)}${FL(86,23)}
+  <circle cx="50" cy="56" r="2.6" class="fill"/><text x="12" y="72">花梗全从一点发出</text>`),
+'头状花序': F(`<path d="M50,98 V76"/>
+  <path class="fill" d="M22,70 C22,58 78,58 78,70 C78,78 22,78 22,70 Z"/><path d="M22,70 C22,58 78,58 78,70 C78,78 22,78 22,70 Z"/>
+  <path d="M22,70 C12,66 8,58 8,52 M78,70 C88,66 92,58 92,52 M28,72 C20,72 14,66 12,60 M72,72 C80,72 86,66 88,60"/>
+  ${FL(30,54,5)}${FL(42,50,5)}${FL(58,50,5)}${FL(70,54,5)}${FL(36,42,4.5)}${FL(50,40,4.5)}${FL(64,42,4.5)}
+  <text x="2" y="92">总苞</text><path class="thin" d="M18,86 L16,74"/><text x="52" y="30">许多无梗小花</text>`),
+'肉穗花序': F(`<path class="fill" d="M28,90 C6,66 14,22 44,8 C34,26 30,60 40,90 Z"/>
+  <path d="M28,90 C6,66 14,22 44,8 C34,26 30,60 40,90"/>
+  <path class="fill" d="M54,88 C48,60 48,34 56,18 C66,34 66,60 60,88 Z"/><path d="M54,88 C48,60 48,34 56,18 C66,34 66,60 60,88 Z"/>
+  <g class="thin"><path d="M52,80 h10 M52,70 h12 M51,60 h13 M51,50 h13 M52,40 h11 M53,30 h9"/></g>
+  <text x="4" y="98">佛焰苞</text><text x="66" y="20">肉质花轴</text>`),
+'隐头花序': F(`<path d="M50,98 V88"/>
+  <path class="fill" d="M50,88 C24,84 14,60 20,40 C26,18 74,18 80,40 C86,60 76,84 50,88 Z"/>
+  <path d="M50,88 C24,84 14,60 20,40 C26,18 74,18 80,40 C86,60 76,84 50,88 Z"/>
+  <path d="M44,22 C46,16 54,16 56,22"/>
+  <path class="thin" d="M50,84 C32,80 24,60 28,42 C34,26 66,26 72,42 C76,60 68,80 50,84"/>
+  <g class="thin"><path d="M30,50 l7,3 M31,62 l7,2 M36,74 l7,0 M70,50 l-7,3 M69,62 l-7,2 M64,74 l-7,0 M34,38 l6,5 M66,38 l-6,5 M46,30 l1,7 M54,30 l-1,7"/></g>
+  <text x="58" y="14">顶孔</text><text x="2" y="98">花藏在中空花托内壁</text>`),
+'聚伞花序': F(`<path d="M50,98 V44"/>${FL(50,34,8)}<text x="60" y="30">①顶花先开</text>
+  <path d="M50,58 L26,42 M50,58 L74,42"/>${FL(20,38,6)}${FL(80,38,6)}<text x="2" y="24">②</text><text x="88" y="24">②</text>
+  <path d="M28,54 L12,64 M72,54 L88,64"/>${FL(9,70,4.5)}${FL(91,70,4.5)}<text x="2" y="86">③</text><text x="88" y="86">③</text>
+  <path class="thin" d="M26,42 L28,54 M74,42 L72,54"/>`),
+});
+
+/* ===== 花的结构：同一张纵切图，逐部件高亮 ===== */
+const FLOWER = (hl) => {
+  const H = Array.isArray(hl) ? hl : [hl];
+  const k = n => H.includes(n) ? ' class="hl"' : ' class="thin"';
+  return F(`<path class="thin" d="M50,98 V86"/>
+  <path${k('托')} d="M38,86 C38,80 62,80 62,86"/>
+  <path${k('萼')} d="M40,84 C28,80 18,70 14,58 C26,62 36,72 42,82"/>
+  <path${k('萼')} d="M60,84 C72,80 82,70 86,58 C74,62 64,72 58,82"/>
+  <path${k('冠')} d="M42,82 C30,72 22,54 22,36 C34,46 44,62 47,78"/>
+  <path${k('冠')} d="M58,82 C70,72 78,54 78,36 C66,46 56,62 53,78"/>
+  <path${k('蕊')} d="M45,80 C36,66 32,48 33,32"/><ellipse${k('蕊')} cx="32" cy="26" rx="4" ry="7"/>
+  <path${k('蕊')} d="M55,80 C64,66 68,48 67,32"/><ellipse${k('蕊')} cx="68" cy="26" rx="4" ry="7"/>
+  <path${k('雌')} d="M50,78 C40,74 38,60 42,52 C46,46 54,46 58,52 C62,60 60,74 50,78 Z"/>
+  <path${k('雌')} d="M50,50 V24"/><ellipse${k('雌')} cx="50" cy="20" rx="7" ry="4"/>
+  <circle cx="46" cy="64" r="2.5" class="thin"/><circle cx="54" cy="64" r="2.5" class="thin"/>`);
+};
+Object.assign(FIG, {
+'花被': FLOWER(['萼','冠']),
+'花萼／萼片': FLOWER('萼'),
+'花冠／花瓣': FLOWER('冠'),
+'雄蕊': FLOWER('蕊'),
+'雌蕊与心皮': FLOWER('雌'),
+'辐射对称花': F(`<g class="thin dash"><path d="M50,8 V92 M14,29 L86,71 M14,71 L86,29"/></g>
+  ${[0,72,144,216,288].map(a=>`<ellipse cx="50" cy="24" rx="13" ry="17" transform="rotate(${a} 50 50)" class="fill"/><ellipse cx="50" cy="24" rx="13" ry="17" transform="rotate(${a} 50 50)"/>`).join('')}
+  <circle cx="50" cy="50" r="8"/><text x="2" y="98">多个对称面</text>`),
+'两侧对称花': F(`<g class="thin dash"><path d="M50,6 V94"/></g>
+  <path class="fill" d="M50,52 C34,52 24,40 26,28 C32,18 46,18 50,30 C54,18 68,18 74,28 C76,40 66,52 50,52 Z"/>
+  <path d="M50,52 C34,52 24,40 26,28 C32,18 46,18 50,30 C54,18 68,18 74,28 C76,40 66,52 50,52 Z"/>
+  <path class="fill" d="M50,52 C32,52 18,62 18,74 C26,86 42,88 50,78 C58,88 74,86 82,74 C82,62 68,52 50,52 Z"/>
+  <path d="M50,52 C32,52 18,62 18,74 C26,86 42,88 50,78 C58,88 74,86 82,74 C82,62 68,52 50,52 Z"/>
+  <text x="8" y="98">只有一个对称面</text>`),
+'蝶形花冠': F(`<path class="fill" d="M24,44 C24,20 76,20 76,44 C76,52 62,54 50,54 C38,54 24,52 24,44 Z"/>
+  <path d="M24,44 C24,20 76,20 76,44 C76,52 62,54 50,54 C38,54 24,52 24,44 Z"/><text x="30" y="16">旗瓣</text>
+  <path class="fill" d="M20,58 C20,50 40,50 46,56 C46,66 26,68 20,58 Z"/><path d="M20,58 C20,50 40,50 46,56 C46,66 26,68 20,58 Z"/>
+  <path class="fill" d="M80,58 C80,50 60,50 54,56 C54,66 74,68 80,58 Z"/><path d="M80,58 C80,50 60,50 54,56 C54,66 74,68 80,58 Z"/>
+  <text x="2" y="46">翼瓣</text><text x="80" y="46">翼瓣</text>
+  <path class="fill" d="M30,70 C36,62 64,62 70,70 C64,84 36,84 30,70 Z"/><path d="M30,70 C36,62 64,62 70,70 C64,84 36,84 30,70 Z"/>
+  <text x="34" y="96">龙骨瓣（内藏蕊）</text>`),
+'唇形花冠': F(`<path d="M14,52 C14,42 26,36 40,36 L74,36"/>
+  <path class="fill" d="M74,36 C86,32 92,22 88,14 C78,16 70,26 68,36 Z"/><path d="M74,36 C86,32 92,22 88,14 C78,16 70,26 68,36 Z"/>
+  <path class="thin" d="M80,30 C84,26 86,22 86,19"/>
+  <path d="M14,52 C14,62 26,68 40,68 L70,68"/>
+  <path class="fill" d="M70,68 C82,72 94,76 96,86 C84,90 74,84 66,70 Z"/><path d="M70,68 C82,72 94,76 96,86 C84,90 74,84 66,70 Z"/>
+  <path class="thin" d="M78,74 C84,80 88,84 90,86 M74,72 C76,80 78,84 80,86"/>
+  <text x="20" y="14">上唇（2裂）</text><text x="20" y="96">下唇（3裂）</text>
+  <path class="thin" d="M20,44 C34,44 48,44 60,44"/><path class="thin" d="M20,58 C34,58 48,58 60,58"/>`),
+'舌状花与管状花': F(`<path class="fill" d="M20,74 C20,62 80,62 80,74 C80,82 20,82 20,74 Z"/><path d="M20,74 C20,62 80,62 80,74 C80,82 20,82 20,74 Z"/>
+  <path d="M50,82 V94"/>
+  <path class="fill" d="M20,66 C10,58 4,44 6,34 C16,42 22,54 24,64 Z"/><path d="M20,66 C10,58 4,44 6,34 C16,42 22,54 24,64 Z"/>
+  <path class="fill" d="M80,66 C90,58 96,44 94,34 C84,42 78,54 76,64 Z"/><path d="M80,66 C90,58 96,44 94,34 C84,42 78,54 76,64 Z"/>
+  <text x="2" y="24">舌状花</text><text x="66" y="24">舌状花</text>
+  <path d="M40,64 V38 M46,64 V32 M54,64 V32 M60,64 V38"/>
+  <path class="thin" d="M37,38 h6 M43,32 h6 M51,32 h6 M57,38 h6"/>
+  <text x="34" y="22">管状花</text>`),
+'十字形花冠': F(`${[0,90,180,270].map(a=>`<ellipse cx="50" cy="26" rx="15" ry="19" transform="rotate(${a} 50 50)" class="fill"/><ellipse cx="50" cy="26" rx="15" ry="19" transform="rotate(${a} 50 50)"/>`).join('')}
+  <circle cx="50" cy="50" r="4" class="fill"/>
+  <path d="M50,50 L50,36 M50,50 L50,64 M50,50 L38,44 M50,50 L62,44 M50,50 L38,56 M50,50 L62,56"/>
+  <g class="thin"><ellipse cx="50" cy="34" rx="2.6" ry="4"/><ellipse cx="50" cy="66" rx="2.6" ry="4"/>
+  <ellipse cx="36" cy="43" rx="2.4" ry="3.4"/><ellipse cx="64" cy="43" rx="2.4" ry="3.4"/>
+  <ellipse cx="36" cy="57" rx="2.4" ry="3.4"/><ellipse cx="64" cy="57" rx="2.4" ry="3.4"/></g>
+  <text x="2" y="96">4瓣十字 · 四强雄蕊(4长2短)</text>`),
+'佛焰苞': F(`<path class="fill" d="M30,94 C4,66 12,20 50,4 C36,26 28,62 40,94 Z"/>
+  <path d="M30,94 C4,66 12,20 50,4 C36,26 28,62 40,94"/>
+  <path class="fill" d="M52,90 C46,64 46,36 54,20 C64,36 64,64 58,90 Z"/><path d="M52,90 C46,64 46,36 54,20 C64,36 64,64 58,90 Z"/>
+  <text x="4" y="98">大型苞片（常被误认作花瓣）</text>`),
+});
+/* ===== 子房位置（花纵切，比较花被着生点） ===== */
+const OVARY = (kind) => {
+  const parts = {
+    sup: `<path class="hl" d="M50,74 C38,72 34,58 38,48 C42,40 58,40 62,48 C66,58 62,72 50,74 Z"/>
+      <path d="M34,76 C34,70 66,70 66,76"/>
+      <path class="thin" d="M38,74 C26,68 18,56 16,44 C26,50 34,60 40,70 M62,74 C74,68 82,56 84,44 C74,50 66,60 60,70"/>
+      <path class="thin" d="M42,72 C34,60 32,44 34,30 M58,72 C66,60 68,44 66,30"/>
+      <path class="thin" d="M50,44 V22"/><ellipse cx="50" cy="18" rx="6" ry="3.5" class="thin"/>
+      <path class="thin dash" d="M6,74 H92"/><text x="2" y="88">花被着生在子房下方</text>`,
+    inf: `<path class="hl" d="M50,86 C34,84 26,72 28,58 C32,48 68,48 72,58 C74,72 66,84 50,86 Z"/>
+      <path d="M28,58 C24,50 30,44 50,44 C70,44 76,50 72,58"/>
+      <path class="thin" d="M32,48 C22,42 14,32 12,22 C22,28 30,36 36,46 M68,48 C78,42 86,32 88,22 C78,28 70,36 64,46"/>
+      <path class="thin" d="M38,46 C30,36 26,22 28,10 M62,46 C70,36 74,22 72,10"/>
+      <path class="thin" d="M50,44 V16"/><ellipse cx="50" cy="12" rx="6" ry="3.5" class="thin"/>
+      <path class="thin dash" d="M6,48 H92"/><text x="2" y="96">花被着生在子房上方</text>
+      <circle cx="44" cy="68" r="3" class="thin"/><circle cx="56" cy="68" r="3" class="thin"/>`,
+    half: `<path class="hl" d="M50,84 C36,82 28,70 30,56 C34,44 66,44 70,56 C72,70 64,82 50,84 Z"/>
+      <path d="M30,66 C24,60 26,52 34,48 M70,66 C76,60 74,52 66,48"/>
+      <path class="thin" d="M28,64 C20,58 14,48 12,38 C22,44 28,52 34,62 M72,64 C80,58 86,48 88,38 C78,44 72,52 66,62"/>
+      <path class="thin" d="M34,62 C28,50 26,36 28,26 M66,62 C72,50 74,36 72,26"/>
+      <path class="thin" d="M50,46 V22"/><ellipse cx="50" cy="18" rx="6" ry="3.5" class="thin"/>
+      <path class="thin dash" d="M6,65 H92"/><text x="2" y="96">下半与花托愈合</text>`,
+  };
+  return F(`<path class="thin" d="M50,98 V90"/>${parts[kind]}`);
+};
+Object.assign(FIG, {
+'子房上位': OVARY('sup'),
+'子房下位': OVARY('inf'),
+'子房半下位': OVARY('half'),
+'胎座': F(`<text x="2" y="12">中轴胎座</text><circle cx="27" cy="46" r="22"/>
+  <path d="M27,24 V68 M8,35 L46,57 M8,57 L46,35"/>
+  <g class="thin"><circle cx="22" cy="38" r="3.4"/><circle cx="32" cy="38" r="3.4"/><circle cx="22" cy="54" r="3.4"/><circle cx="32" cy="54" r="3.4"/></g>
+  <text x="56" y="12">侧膜胎座</text><circle cx="74" cy="46" r="22"/>
+  <g class="thin"><circle cx="74" cy="26" r="3.4"/><circle cx="92" cy="38" r="3.4"/><circle cx="90" cy="58" r="3.4"/><circle cx="60" cy="60" r="3.4"/><circle cx="57" cy="37" r="3.4"/></g>
+  <text x="6" y="90">胚珠着生在中轴上</text><text x="52" y="98">胚珠着生在心皮边缘（子房壁）</text>`),
+'花筒／被丝托': F(`<path class="thin" d="M50,98 V88"/>
+  <path class="fill" d="M28,58 C26,76 36,88 50,88 C64,88 74,76 72,58 Z"/>
+  <path class="hl" d="M28,58 C26,76 36,88 50,88 C64,88 74,76 72,58"/>
+  <path class="thin" d="M28,58 C24,50 32,44 50,44 C68,44 76,50 72,58"/>
+  <path class="thin" d="M30,50 C20,42 14,32 12,22 C22,28 28,36 34,46 M70,50 C80,42 86,32 88,22 C78,28 72,36 66,46"/>
+  <path class="thin" d="M36,46 C28,36 24,22 26,10 M64,46 C72,36 76,22 74,10"/>
+  <g class="thin"><path d="M50,44 V18 M44,44 C42,30 42,22 44,16 M56,44 C58,30 58,22 56,16"/></g>
+  <text x="2" y="96">杯状花筒：萼、瓣、蕊基部合生延伸</text>`),
+
+/* ===== 果实 ===== */
+'蓇葖果': F(`<path class="fill" d="M46,90 C24,74 22,36 40,10 C56,30 58,70 46,90 Z"/>
+  <path d="M46,90 C24,74 22,36 40,10"/>
+  <path d="M46,90 C58,70 56,30 40,10 C60,26 74,60 62,88 Z" class="fill"/>
+  <path d="M46,90 C58,70 56,30 40,10 M46,90 C60,74 74,60 62,88"/>
+  <g class="thin"><circle cx="52" cy="40" r="3.4"/><circle cx="54" cy="54" r="3.4"/><circle cx="53" cy="68" r="3.4"/></g>
+  <text x="2" y="98">单心皮 · 只沿一条缝开裂</text>`),
+'荚果': F(`<path class="fill" d="M14,44 C30,26 70,26 88,42 C74,52 30,54 14,44 Z"/><path d="M14,44 C30,26 70,26 88,42"/>
+  <path class="fill" d="M16,62 C32,78 72,76 88,60 C72,52 30,52 16,62 Z"/><path d="M16,62 C32,78 72,76 88,60"/>
+  <path d="M14,44 C30,52 74,52 88,42 M16,62 C32,52 72,52 88,60"/>
+  <g class="thin"><circle cx="30" cy="44" r="5"/><circle cx="46" cy="41" r="5"/><circle cx="62" cy="41" r="5"/><circle cx="76" cy="44" r="5"/></g>
+  <text x="6" y="94">单心皮 · 沿背腹两条缝开裂</text>`),
+'角果': F(`<path class="fill" d="M28,86 C20,60 20,32 30,10 C40,26 40,64 34,86 Z"/><path d="M28,86 C20,60 20,32 30,10 C40,26 40,64 34,86 Z"/>
+  <path class="fill" d="M72,86 C80,60 80,32 70,10 C60,26 60,64 66,86 Z"/><path d="M72,86 C80,60 80,32 70,10 C60,26 60,64 66,86 Z"/>
+  <path class="hl" d="M50,88 V8"/>
+  <g class="thin"><circle cx="44" cy="26" r="4"/><circle cx="56" cy="34" r="4"/><circle cx="44" cy="46" r="4"/><circle cx="56" cy="56" r="4"/><circle cx="44" cy="66" r="4"/></g>
+  <text x="2" y="98">2心皮 · 中间假隔膜 · 两瓣开裂</text>`),
+'蒴果': F(`<path class="fill" d="M50,88 C24,80 18,50 26,24 C34,34 40,58 40,86 Z"/>
+  <path class="fill" d="M50,88 C76,80 82,50 74,24 C66,34 60,58 60,86 Z"/>
+  <path d="M50,88 C24,80 18,50 26,24 C34,34 40,58 40,86 M50,88 C76,80 82,50 74,24 C66,34 60,58 60,86"/>
+  <path class="fill" d="M40,86 C42,58 46,32 50,14 C54,32 58,58 60,86 Z"/><path d="M40,86 C42,58 46,32 50,14 C54,32 58,58 60,86"/>
+  <path d="M50,88 V96"/><g class="thin"><circle cx="46" cy="62" r="3"/><circle cx="54" cy="62" r="3"/><circle cx="50" cy="50" r="3"/><circle cx="46" cy="38" r="3"/><circle cx="54" cy="38" r="3"/></g>
+  <text x="6" y="98">多心皮 · 开裂方式多样</text>`),
+'瘦果': F(`<path class="fill" d="M50,88 C42,80 40,66 44,56 C48,50 52,50 56,56 C60,66 58,80 50,88 Z"/>
+  <path d="M50,88 C42,80 40,66 44,56 C48,50 52,50 56,56 C60,66 58,80 50,88 Z"/>
+  <path d="M50,52 V32"/>
+  <g class="thin"><path d="M50,32 L24,10 M50,32 L34,8 M50,32 L46,6 M50,32 L58,6 M50,32 L70,10 M50,32 L78,14 M50,32 L20,20"/></g>
+  <text x="4" y="98">干燥不裂 · 一粒种子 · 常具冠毛</text>`),
+'颖果': F(`<path class="fill" d="M50,90 C30,78 26,40 42,12 C58,4 72,20 70,50 C68,74 60,86 50,90 Z"/>
+  <path stroke-width="2.8" d="M50,90 C30,78 26,40 42,12 C58,4 72,20 70,50 C68,74 60,86 50,90 Z"/>
+  <path class="thin" d="M46,76 C40,62 40,40 48,24"/>
+  <text x="2" y="98">果皮与种皮完全愈合（禾本科）</text>`),
+'核果': F(`<circle cx="50" cy="50" r="42" class="fill"/><circle cx="50" cy="50" r="42"/>
+  <circle cx="50" cy="50" r="40" class="thin"/>
+  <path class="hl" d="M50,80 C34,74 28,60 32,44 C38,30 62,30 68,44 C72,60 66,74 50,80 Z"/>
+  <path class="thin" d="M50,74 C40,68 36,58 40,46 C46,38 54,38 60,46 C64,58 60,68 50,74 Z"/>
+  <text x="2" y="14">外果皮</text><text x="2" y="26">中果皮肉质</text><text x="52" y="94">内果皮木质＝核</text>`),
+'浆果': F(`<circle cx="50" cy="52" r="40" class="fill"/><circle cx="50" cy="52" r="40"/>
+  <path class="thin" d="M50,12 V92 M14,38 C34,52 66,52 86,38 M16,68 C34,58 66,58 84,68"/>
+  <g class="thin"><circle cx="36" cy="40" r="4.5"/><circle cx="64" cy="40" r="4.5"/><circle cx="34" cy="64" r="4.5"/><circle cx="66" cy="64" r="4.5"/><circle cx="50" cy="52" r="4.5"/><circle cx="50" cy="30" r="4.5"/><circle cx="50" cy="74" r="4.5"/></g>
+  <text x="8" y="98">果皮肉质多汁 · 多粒种子</text>`),
+'梨果': F(`<path class="fill" d="M50,92 C18,86 8,60 14,38 C22,20 78,20 86,38 C92,60 82,86 50,92 Z"/>
+  <path d="M50,92 C18,86 8,60 14,38 C22,20 78,20 86,38 C92,60 82,86 50,92 Z"/>
+  <path class="hl" d="M50,76 C36,72 30,58 34,46 C40,38 60,38 66,46 C70,58 64,72 50,76 Z"/>
+  <g class="thin"><circle cx="42" cy="52" r="3.6"/><circle cx="58" cy="52" r="3.6"/><circle cx="50" cy="64" r="3.6"/></g>
+  <path class="thin" d="M50,26 V12"/>
+  <text x="2" y="16">花筒发育（可食部分）</text><text x="30" y="98">心皮＝苹果核</text>`),
+'聚合果': F(`<path class="fill" d="M50,92 C26,84 20,62 30,48 C40,40 60,40 70,48 C80,62 74,84 50,92 Z"/>
+  <path d="M50,92 C26,84 20,62 30,48 C40,40 60,40 70,48 C80,62 74,84 50,92 Z"/>
+  <g><circle cx="38" cy="56" r="6"/><circle cx="54" cy="52" r="6"/><circle cx="66" cy="60" r="6"/><circle cx="32" cy="70" r="6"/><circle cx="48" cy="68" r="6"/><circle cx="62" cy="74" r="6"/><circle cx="42" cy="82" r="6"/><circle cx="56" cy="86" r="5"/></g>
+  <path class="thin" d="M50,40 V26"/><path class="thin" d="M36,32 C42,30 58,30 64,32"/>
+  <text x="2" y="16">一朵花 · 多枚离生雌蕊</text><text x="6" y="98">小果聚生在同一花托上</text>`),
+'聚花果': F(`<path d="M50,96 V78"/>
+  <g><circle cx="42" cy="70" r="8"/><circle cx="60" cy="66" r="8"/><circle cx="38" cy="52" r="8"/><circle cx="56" cy="48" r="8"/><circle cx="44" cy="34" r="8"/><circle cx="60" cy="30" r="7"/><circle cx="50" cy="16" r="6"/></g>
+  <path class="thin" d="M42,70 L50,80 M60,66 L52,78 M38,52 L48,62 M56,48 L48,58"/>
+  <text x="2" y="98">整个花序发育成果（桑葚型）</text>`),
+'翅果': F(`<path class="fill" d="M46,58 C46,48 54,48 54,58 C54,68 46,68 46,58 Z"/><path d="M46,58 C46,48 54,48 54,58 C54,68 46,68 46,58 Z"/>
+  <path class="fill" d="M46,54 C34,40 16,26 6,26 C10,42 26,54 44,60 Z"/><path d="M46,54 C34,40 16,26 6,26 C10,42 26,54 44,60"/>
+  <path class="fill" d="M54,54 C66,40 84,26 94,26 C90,42 74,54 56,60 Z"/><path d="M54,54 C66,40 84,26 94,26 C90,42 74,54 56,60"/>
+  <g class="thin"><path d="M42,54 C32,44 20,34 12,30 M46,50 C38,40 28,30 20,26 M58,54 C68,44 80,34 88,30 M54,50 C62,40 72,30 80,26"/></g>
+  <text x="14" y="86">果皮延展成翅 · 风力传播</text>`),
+});
+
+/* =========================================================================
+   7.5 基础术语库（bootstrap）——不依赖 API，直接进牌堆开练
+   ========================================================================= */
+const SEED = [
+{c:'习性与茎',t:'草本',e:'herb',d:'茎不木质化，地上部分常在一年或一季后枯死。',s:'蒲公英、车前'},
+{c:'习性与茎',t:'灌木',e:'shrub',d:'木本，无明显主干，近基部就多分枝。',s:'月季、南天竹'},
+{c:'习性与茎',t:'乔木',e:'tree',d:'木本，有明显直立主干，上部才分枝。',s:'香樟、悬铃木'},
+{c:'习性与茎',t:'藤本',e:'liana / vine',d:'茎不能自行直立，靠缠绕、卷须、吸盘或钩刺攀附他物。',s:'牵牛（缠绕）、爬山虎（吸盘）、葡萄（卷须）'},
+{c:'习性与茎',t:'匍匐茎',e:'stolon',d:'沿地面横走的茎，节上生根长成新植株，是营养繁殖方式。',s:'草莓、狗牙根'},
+{c:'习性与茎',t:'根状茎',e:'rhizome',d:'地下横走的茎。有节、节间和鳞片叶——这三点是它与根的区别。',s:'竹、姜、鸢尾'},
+{c:'习性与茎',t:'四棱茎',e:'quadrangular stem',d:'茎横切面近方形，用手指捻一下就能感到棱。见到它先想唇形科。',s:'薄荷、益母草、紫苏'},
+{c:'习性与茎',t:'节与节间',e:'node / internode',d:'叶着生的位置叫节，两节之间叫节间。判断叶序前必须先找准节。',s:'竹的节最直观'},
+
+{c:'叶序',t:'互生',e:'alternate',d:'每节只着生一片叶，叶在茎上呈螺旋状排列。',s:'桃、樟、蔷薇科多数'},
+{c:'叶序',t:'对生',e:'opposite',d:'每节相对着生两片叶。',s:'薄荷、女贞、桂花'},
+{c:'叶序',t:'交互对生',e:'decussate',d:'相邻两对叶互成直角，从顶端俯视呈十字形。',s:'唇形科多数'},
+{c:'叶序',t:'轮生',e:'whorled',d:'每节着生三片或更多叶。',s:'夹竹桃、猪殃殃'},
+{c:'叶序',t:'簇生',e:'fascicled',d:'多叶生于极度缩短的短枝上，看似成束长出。',s:'银杏、松（针叶成束）'},
+{c:'叶序',t:'基生叶',e:'basal leaf',d:'叶集生于茎基部贴近地面，常排成莲座状。',s:'蒲公英、车前'},
+
+{c:'叶的组成',t:'单叶',e:'simple leaf',d:'一个叶柄上只有一片叶片。',s:'樟、桃'},
+{c:'叶的组成',t:'复叶',e:'compound leaf',d:'一个叶柄上着生两片以上小叶。判别诀窍：腋芽只长在总叶柄基部，小叶腋里没有芽。',s:'槐、月季'},
+{c:'叶的组成',t:'羽状复叶',e:'pinnately compound',d:'小叶排列在叶轴两侧，形如羽毛。顶端有一片小叶为奇数羽状，无则为偶数羽状。',s:'月季（奇数）、皂荚（偶数）'},
+{c:'叶的组成',t:'掌状复叶',e:'palmately compound',d:'所有小叶都着生在叶柄顶端的一个点上，向外辐射。',s:'七叶树、鹅掌柴'},
+{c:'叶的组成',t:'三出复叶',e:'ternate',d:'由三片小叶组成的复叶。',s:'白车轴草（三叶草）、酢浆草'},
+{c:'叶的组成',t:'二回羽状复叶',e:'bipinnate',d:'叶轴再分枝成羽片，羽片上才生小叶。',s:'合欢、含羞草'},
+{c:'叶的组成',t:'托叶',e:'stipule',d:'叶柄基部两侧的附属物，可变成刺、卷须、鞘，也常早落。新手最容易漏看，却是蔷薇科、豆科、蓼科的关键。',s:'月季（羽裂托叶）、洋槐（托叶刺）'},
+{c:'叶的组成',t:'托叶鞘',e:'ocrea',d:'两枚托叶合生成膜质鞘包住茎节，是蓼科的诊断特征。',s:'萹蓄、何首乌'},
+{c:'叶的组成',t:'叶鞘与叶舌',e:'sheath / ligule',d:'叶基部包裹茎的筒状部分为叶鞘，鞘与叶片交界处的膜片为叶舌。禾本科的分种常靠叶舌形状。',s:'水稻、狗尾草'},
+
+{c:'叶形',t:'卵形',e:'ovate',d:'最宽处在近基部，形如鸡蛋的纵切面。',s:'紫苏'},
+{c:'叶形',t:'披针形',e:'lanceolate',d:'长约为宽的 3–5 倍，中部以下最宽，向顶端渐狭。',s:'柳、夹竹桃'},
+{c:'叶形',t:'椭圆形',e:'elliptic',d:'最宽处在中部，两端约等宽而钝。',s:'冬青'},
+{c:'叶形',t:'心形',e:'cordate',d:'基部内凹成心形缺口，两侧圆裂片对称。',s:'紫荆、牵牛'},
+{c:'叶形',t:'肾形',e:'reniform',d:'宽明显大于长，基部凹入，形如肾。',s:'积雪草'},
+{c:'叶形',t:'线形',e:'linear',d:'狭长，两侧边缘近平行。',s:'麦冬、禾本科多数'},
+{c:'叶形',t:'盾形',e:'peltate',d:'叶柄着生在叶片背面中央而非边缘——一眼就能认出。',s:'莲、蓖麻、旱金莲'},
+{c:'叶形',t:'箭形与戟形',e:'sagittate / hastate',d:'基部两裂片向下垂为箭形，向两侧外展为戟形。',s:'慈姑（箭）、菠菜幼叶（戟）'},
+{c:'叶形',t:'掌状分裂',e:'palmately lobed',d:'叶片有深裂但裂口不达中脉，仍是单叶——别误判成复叶。',s:'悬铃木、葡萄'},
+
+{c:'叶缘',t:'全缘',e:'entire',d:'边缘平滑，无任何齿或缺刻。',s:'女贞、玉兰'},
+{c:'叶缘',t:'锯齿',e:'serrate',d:'齿尖朝向叶尖方向倾斜，形如锯条。',s:'桃、樱'},
+{c:'叶缘',t:'重锯齿',e:'doubly serrate',d:'大锯齿的边上再生小锯齿。',s:'榆、桦'},
+{c:'叶缘',t:'牙齿状',e:'dentate',d:'齿尖垂直于边缘向外，不朝叶尖倾斜。',s:'荨麻'},
+{c:'叶缘',t:'圆齿',e:'crenate',d:'齿的顶端圆钝而非尖锐。',s:'活血丹'},
+{c:'叶缘',t:'波状',e:'undulate',d:'边缘起伏成波浪，但没有明确的齿。',s:'茄'},
+{c:'叶缘',t:'缘毛',e:'ciliate',d:'边缘生一列细毛，需要侧光或放大镜才看得清。',s:'酢浆草'},
+
+{c:'叶脉',t:'网状脉',e:'reticulate',d:'侧脉多次分枝并连接成网。双子叶植物的典型特征。',s:'多数阔叶树'},
+{c:'叶脉',t:'羽状脉',e:'pinnate venation',d:'一条中脉贯穿，侧脉自中脉两侧羽状伸出。',s:'桃、樟'},
+{c:'叶脉',t:'掌状脉',e:'palmate venation',d:'数条近等粗的主脉自叶基一点向外辐射。',s:'葡萄、悬铃木、蓖麻'},
+{c:'叶脉',t:'平行脉',e:'parallel',d:'各脉自基部到顶端近于平行，不结成网。单子叶植物的典型特征。',s:'竹、水稻、玉米'},
+{c:'叶脉',t:'弧形脉',e:'arcuate',d:'平行脉在中部外弯、顶端又汇合成弧。仍属平行脉范畴。',s:'车前、玉簪'},
+{c:'叶脉',t:'叉状脉',e:'dichotomous',d:'叶脉二叉分枝而不结网，是较原始的类型。',s:'银杏、多数蕨类'},
+
+{c:'叶尖与叶基',t:'渐尖',e:'acuminate',d:'先端逐渐变狭，尖头较长且边缘内凹。',s:'构树'},
+{c:'叶尖与叶基',t:'急尖',e:'acute',d:'先端成一锐角，但不延长成长尖。',s:'冬青'},
+{c:'叶尖与叶基',t:'钝形',e:'obtuse',d:'先端钝圆，夹角大于直角。',s:'黄杨'},
+{c:'叶尖与叶基',t:'微凹',e:'emarginate',d:'先端中央有一个浅的凹缺。',s:'紫荆的部分叶、黄杨'},
+{c:'叶尖与叶基',t:'尾尖',e:'caudate',d:'先端延长成一条细长的尾状尖，多见于热带雨林植物（滴水叶尖）。',s:'菩提树'},
+{c:'叶尖与叶基',t:'叶基偏斜',e:'oblique base',d:'叶片基部两侧不对称，一边高一边低。极易被忽略，却是榆科、秋海棠科的关键。',s:'榆、朴树、秋海棠'},
+{c:'叶尖与叶基',t:'楔形基',e:'cuneate',d:'基部两侧向下逐渐变狭，形如楔子。',s:'月季小叶'},
+{c:'叶尖与叶基',t:'抱茎',e:'amplexicaul',d:'叶基部无柄并环抱茎；若茎从叶片中穿过则称穿茎。',s:'苦荬菜、抱茎苦荬菜'},
+
+{c:'花序',t:'花序',e:'inflorescence',d:'花在花轴上排列的方式。观察时先定"有限/无限"：顶花先开为有限（聚伞类），自下而上开为无限（总状类）。',s:''},
+{c:'花序',t:'总状花序',e:'raceme',d:'主轴不分枝，花具近等长的花梗，自下而上依次开放。',s:'紫藤、油菜'},
+{c:'花序',t:'穗状花序',e:'spike',d:'与总状类似，但花无梗，直接着生在花轴上。',s:'车前、马鞭草'},
+{c:'花序',t:'柔荑花序',e:'catkin',d:'由无梗单性花组成、通常下垂、花后整个脱落的穗状花序。',s:'杨、柳、栎、核桃'},
+{c:'花序',t:'伞房花序',e:'corymb',d:'花梗下部长、上部短，把所有花托到近同一平面上。',s:'山楂、麻叶绣线菊'},
+{c:'花序',t:'伞形花序',e:'umbel',d:'花梗近等长，全部从花轴顶端的同一点发出，形如伞骨。',s:'胡萝卜、芹菜（复伞形）'},
+{c:'花序',t:'头状花序',e:'capitulum',d:'许多无梗小花密集着生在膨大的花托上，外围有总苞——整体看起来像"一朵花"，实为一个花序。',s:'蒲公英、向日葵、菊'},
+{c:'花序',t:'肉穗花序',e:'spadix',d:'肉质肥厚的花轴上密生无梗小花，外常包有大型佛焰苞。',s:'马蹄莲、半夏、菖蒲'},
+{c:'花序',t:'隐头花序',e:'hypanthodium',d:'花着生在中空肉质花托的内壁上，仅顶端留一小孔通外界。',s:'无花果、榕树'},
+{c:'花序',t:'聚伞花序',e:'cyme',d:'顶端的花先开，其下侧枝再生花——属有限花序。',s:'石竹、卫矛、马缨丹'},
+
+{c:'花的结构',t:'花被',e:'perianth',d:'花萼与花冠的合称。二者不分化时统称被片（tepal）。',s:'百合、玉兰的花被不分化'},
+{c:'花的结构',t:'花萼／萼片',e:'calyx / sepal',d:'花最外一轮，通常绿色，花蕾期起保护作用。',s:''},
+{c:'花的结构',t:'花冠／花瓣',e:'corolla / petal',d:'花萼之内的一轮，常有颜色，主要功能是吸引传粉者。',s:''},
+{c:'花的结构',t:'雄蕊',e:'stamen',d:'由花丝和花药组成，花药内产生花粉。雄蕊数目、离合、长短是重要分类依据。',s:''},
+{c:'花的结构',t:'雌蕊与心皮',e:'pistil / carpel',d:'雌蕊由柱头、花柱、子房构成；心皮是构成雌蕊的基本单位，数目可从柱头分叉或子房室数推断。',s:''},
+{c:'花的结构',t:'辐射对称花',e:'actinomorphic',d:'通过花心可作两个以上对称面。也叫整齐花。',s:'桃、油菜'},
+{c:'花的结构',t:'两侧对称花',e:'zygomorphic',d:'只有一个对称面。也叫不整齐花，常与专一化传粉相关。',s:'豌豆、薄荷、兰花'},
+{c:'花的结构',t:'蝶形花冠',e:'papilionaceous',d:'5 枚花瓣分化为旗瓣 1、翼瓣 2、龙骨瓣 2。',s:'豌豆、紫藤、槐'},
+{c:'花的结构',t:'唇形花冠',e:'bilabiate',d:'合瓣花冠上下分成二唇，常上唇 2 裂、下唇 3 裂。',s:'薄荷、益母草、金鱼草'},
+{c:'花的结构',t:'舌状花与管状花',e:'ray / disc floret',d:'菊科头状花序里的两类小花。全为舌状（蒲公英）、全为管状（蓟）、还是外舌内管（向日葵），是分亚科的第一步。',s:'向日葵：边缘舌状、中央管状'},
+{c:'花的结构',t:'十字形花冠',e:'cruciform',d:'4 枚花瓣排成十字形，配 6 枚雄蕊中 4 长 2 短的四强雄蕊。',s:'油菜、荠菜'},
+{c:'花的结构',t:'佛焰苞',e:'spathe',d:'包围肉穗花序的一枚大型苞片，常被误认作花瓣。',s:'马蹄莲的"白花"其实是佛焰苞'},
+
+{c:'子房与胎座',t:'子房上位',e:'superior ovary',d:'花萼、花冠、雄蕊都着生在子房下方，子房高居其上。也叫下位花。',s:'油菜、百合、番茄'},
+{c:'子房与胎座',t:'子房下位',e:'inferior ovary',d:'子房埋于凹陷花托内并与之愈合，花被和雄蕊着生在子房之上。看花时留意花下方那截"小膨大"。',s:'菊科、瓜类、苹果'},
+{c:'子房与胎座',t:'子房半下位',e:'half-inferior',d:'子房下半部与花托愈合，上半部游离。',s:'虎耳草、马齿苋'},
+{c:'子房与胎座',t:'胎座',e:'placenta',d:'胚珠在子房内的着生部位。中轴、侧膜、特立中央、边缘等类型是重要的分科依据——横切一个子房就能看到。',s:'番茄（中轴）、黄瓜（侧膜）'},
+{c:'子房与胎座',t:'花筒／被丝托',e:'hypanthium',d:'萼片、花瓣、雄蕊基部合生并延伸成的杯状或筒状结构。蔷薇科各亚科的区分要点之一。',s:'月季、梅'},
+
+{c:'果实',t:'蓇葖果',e:'follicle',d:'由单心皮发育，成熟时只沿一条缝线开裂。',s:'八角、芍药、梧桐'},
+{c:'果实',t:'荚果',e:'legume',d:'由单心皮发育，成熟时沿背腹两条缝线开裂。豆科的标志。',s:'豌豆、槐'},
+{c:'果实',t:'角果',e:'silique',d:'由 2 心皮发育，中间有一层假隔膜，成熟时两瓣从下向上开裂。十字花科的标志。',s:'油菜（长角果）、荠菜（短角果）'},
+{c:'果实',t:'蒴果',e:'capsule',d:'由多心皮合生发育，成熟时以多种方式（纵裂、孔裂、盖裂）开裂。',s:'棉、牵牛、罂粟（孔裂）'},
+{c:'果实',t:'瘦果',e:'achene',d:'干燥不开裂，只含一粒种子，果皮与种皮易分离。',s:'向日葵、蒲公英'},
+{c:'果实',t:'颖果',e:'caryopsis',d:'果皮与种皮完全愈合、无法分离。禾本科专有——一粒米就是一个果实。',s:'小麦、水稻、玉米'},
+{c:'果实',t:'核果',e:'drupe',d:'外果皮薄、中果皮肉质、内果皮木质化成硬核，核内含种子。',s:'桃、梅、橄榄'},
+{c:'果实',t:'浆果',e:'berry',d:'果皮除最外层外都肉质多汁，内含多粒种子，无硬核。',s:'葡萄、番茄、柿'},
+{c:'果实',t:'梨果',e:'pome',d:'花筒与子房共同发育成的假果，可食部分主要来自花筒。蔷薇科苹果亚科特征。',s:'苹果、梨、山楂'},
+{c:'果实',t:'聚合果',e:'aggregate fruit',d:'一朵花中多枚离生雌蕊各自发育成小果，聚生在同一花托上。',s:'草莓（聚合瘦果）、莲、悬钩子'},
+{c:'果实',t:'聚花果',e:'multiple fruit',d:'由整个花序发育而成的果实，也叫复果。',s:'桑葚、菠萝、无花果'},
+{c:'果实',t:'翅果',e:'samara',d:'果皮向外延展成翅，靠风传播。',s:'槭（枫）、榆、白蜡'},
+
+{c:'常见科速记',t:'唇形科',e:'Lamiaceae',d:'茎四棱、叶交互对生、唇形花冠、2 强雄蕊、果为 4 枚小坚果，全株多含芳香油。',s:'薄荷、紫苏、益母草、迷迭香'},
+{c:'常见科速记',t:'菊科',e:'Asteraceae',d:'头状花序外具总苞、子房下位 1 室、瘦果常具冠毛。被子植物中最大的科之一。',s:'蒲公英、向日葵、菊、蓟'},
+{c:'常见科速记',t:'豆科',e:'Fabaceae',d:'羽状或三出复叶且具托叶、果为荚果、根部常有根瘤。花冠有蝶形/辐射两大类。',s:'槐、紫藤、含羞草、大豆'},
+{c:'常见科速记',t:'十字花科',e:'Brassicaceae',d:'十字形花冠 + 四强雄蕊 + 角果，三点齐了基本不会错。',s:'油菜、荠菜、萝卜、白菜'},
+{c:'常见科速记',t:'蔷薇科',e:'Rosaceae',d:'叶互生且具托叶、花 5 基数辐射对称、雄蕊多数、有杯状花筒。果型多变（核果/梨果/聚合果）正好用来分亚科。',s:'桃、月季、苹果、草莓'},
+{c:'常见科速记',t:'伞形科',e:'Apiaceae',d:'复伞形花序、茎常中空有棱、叶柄基部扩大成鞘、果为双悬果。多含挥发油而气味浓。',s:'胡萝卜、芹菜、当归、蛇床'},
+{c:'常见科速记',t:'禾本科',e:'Poaceae',d:'秆常中空有节、叶二列且具叶鞘叶舌、花序基本单位是小穗、果为颖果。',s:'水稻、竹、狗尾草、芦苇'},
+{c:'常见科速记',t:'葫芦科',e:'Cucurbitaceae',d:'草质藤本具卷须、单性花、子房下位、果为瓠果。',s:'黄瓜、南瓜、葫芦、栝楼'},
+{c:'常见科速记',t:'茄科',e:'Solanaceae',d:'花冠常辐状 5 裂、雄蕊贴生于花冠筒且花药常靠合、果为浆果或蒴果。多含生物碱。',s:'番茄、辣椒、龙葵、曼陀罗'},
+{c:'常见科速记',t:'毛茛科',e:'Ranunculaceae',d:'花各部多数、离生、螺旋状排列于膨大花托上，是较原始的类群。',s:'毛茛、乌头、铁线莲、白头翁'},
+];
+
+FIG['花序'] = F(`<text x="2" y="10">无限花序</text><path d="M26,96 V26"/>
+  <path d="M26,80 L12,74 M26,80 L40,74 M26,62 L14,56 M26,62 L38,56 M26,46 L16,41 M26,46 L36,41"/>
+  ${FL(9,73,6)}${FL(43,73,6)}${FL(11,55,5)}${FL(41,55,5)}${FL(14,40,4)}${FL(38,40,4)}${FL(26,28,3)}
+  <text x="2" y="94">↑ 自下而上开</text>
+  <text x="56" y="10">有限花序</text><path d="M76,96 V44"/>${FL(76,34,8)}
+  <path d="M76,58 L58,46 M76,58 L94,46"/>${FL(55,42,5.5)}${FL(97,42,5.5)}
+  <text x="56" y="24">顶花先开 ↓</text>`);
+
+const SEED_CATS = [...new Set(SEED.map(s => s.c))];
+
+async function renderSeed() {
+  const have = new Set((await DB.all('cards')).map(c => c.term));
+  $('#seed-list').innerHTML = SEED_CATS.map(cat => {
+    const items = SEED.filter(s => s.c === cat);
+    const got = items.filter(s => have.has(s.t)).length;
+    return `<div class="feat" style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <b>${esc(cat)}</b> <span class="tiny muted">${items.length} 词</span>
+        <div class="obs tiny">${items.slice(0,4).map(s=>esc(s.t)).join(' · ')}${items.length>4?' …':''}</div>
+      </div>
+      ${got === items.length
+        ? '<span class="tiny muted">已载入</span>'
+        : `<button class="ghost" data-seed="${esc(cat)}">载入 ${items.length - got}</button>`}
+    </div>`;
+  }).join('');
+  $('#seed-list').querySelectorAll('[data-seed]').forEach(b =>
+    b.onclick = () => loadSeed(b.dataset.seed));
+}
+
+async function loadSeed(cat) {
+  const have = new Set((await DB.all('cards')).map(c => c.term));
+  const items = SEED.filter(s => cat === '*' || s.c === cat);
+  let n = 0;
+  for (const s of items) {
+    if (have.has(s.t)) continue;
+    await DB.put('cards', {
+      term: s.t, en: s.e, def: s.d, seen: s.s || '（还没在自己的观察里遇到）',
+      cat: s.c, entryId: null, ease: 2.5, interval: 0, due: Date.now(), reps: 0
+    });
+    n++;
+  }
+  await refreshDeck();
+  $('#status2') && ($('#status2').textContent = `已载入 ${n} 张`);
+}
+
+let queue = [], current = null, flipped = false;
+let deckMode = localStorage.getItem('deckMode') || 'term';
+
+async function refreshDeck() {
+  const all = await DB.all('cards');
+  const groups = new Map(SEED_CATS.map(c => [c, []]));
+  groups.set('来自我的观察', []);
+  for (const c of all) (groups.get(c.cat) || groups.get('来自我的观察')).push(c);
+
+  $('#allterms').innerHTML = all.length
+    ? [...groups].filter(([,v]) => v.length).map(([k, v]) => `
+        <div class="sec-title" style="margin-top:18px">${esc(k)} <span class="tiny muted" style="font-weight:400">${v.length}</span></div>
+        ${v.sort((a,b)=>a.term.localeCompare(b.term,'zh')).map(c => {
+          const f = FIG[c.term];
+          return `<div class="feat${f ? ' withfig' : ''}">
+           ${f ? `<div class="figmini">${f}</div>` : ''}
+           <div><b>${esc(c.term)} <span class="muted sci" style="font-weight:400">${esc(c.en)}</span></b>
+           <div class="obs">${esc(c.def)}</div>
+           ${c.seen ? `<div class="tiny muted">实例：${esc(c.seen)}</div>` : ''}</div></div>`;
+        }).join('')}`).join('')
+    : '<p class="muted">暂无</p>';
+
+  queue = all.filter(c => c.due <= Date.now()).sort((a,b) => a.due - b.due);
+  nextCard();
+  renderSeed();
+}
+
+function nextCard() {
+  const box = $('#deck-box');
+  current = queue.shift(); flipped = false;
+  if (!current) {
+    box.innerHTML = `<p class="muted" style="text-align:center;padding:30px 0">
+      没有待复习的卡片了 🌿<br><span class="tiny">继续去观察新植物，或稍后再来</span></p>`;
+    return;
+  }
+  draw();
+}
+
+function figOf(term) { return FIG[term] ? `<div class="figbox">${FIG[term]}</div>` : ''; }
+
+function realPhoto(c) {
+  const q = encodeURIComponent(c.en || c.term);
+  const z = encodeURIComponent(c.term + ' 植物');
+  return `<div style="margin-top:16px">看实物照片：
+    <a class="reallink" target="_blank" rel="noopener"
+       href="https://commons.wikimedia.org/w/index.php?search=${q}&ns6=1">维基共享</a> ·
+    <a class="reallink" target="_blank" rel="noopener"
+       href="https://image.baidu.com/search/index?tn=baiduimage&word=${z}">百度图片</a></div>`;
+}
+
+function draw() {
+  const fig = figOf(current.term);
+  const rev = deckMode === 'fig' && fig;
+  $('#deck-box').innerHTML = `
+    <div id="cardface">
+      ${rev
+        ? `${fig}${flipped
+            ? `<div class="term" style="margin-top:14px">${esc(current.term)}</div>
+               <div class="en">${esc(current.en)}</div>`
+            : '<p class="tiny muted" style="margin-top:14px">这是什么？</p>'}`
+        : `<div class="term">${esc(current.term)}</div>
+           <div class="en">${esc(current.en)}</div>
+           ${flipped ? fig : ''}`}
+      ${flipped ? `<div class="def">${esc(current.def)}
+        <div class="tiny muted" style="margin-top:12px">实例：${esc(current.seen)}</div>
+        ${realPhoto(current)}</div>` : ''}
+    </div>
+    <div class="row" style="justify-content:center">
+      ${flipped
+        ? `<button class="ghost" data-q="0">不认识</button>
+           <button class="ghost" data-q="1">模糊</button>
+           <button class="primary" data-q="2">认识</button>`
+        : `<button class="primary" id="flip">${deckMode === 'fig' ? '显示答案' : '显示图与释义'}</button>`}
+    </div>
+    <p class="tiny muted" style="text-align:center;margin:14px 0 0">队列剩余 ${queue.length}</p>`;
+
+  if (!flipped) $('#flip').onclick = () => { flipped = true; draw(); };
+  else $('#deck-box').querySelectorAll('[data-q]').forEach(b => b.onclick = () => grade(+b.dataset.q));
+}
+
+async function grade(q) {
+  const DAY = 864e5;
+  const c = current;
+  c.reps++;
+  if (q === 0) { c.ease = Math.max(1.3, c.ease - 0.2); c.interval = 0; c.due = Date.now() + 6e5; queue.push(c); }
+  else if (q === 1) { c.interval = c.interval ? c.interval * 1.2 : 1; c.due = Date.now() + c.interval * DAY; }
+  else { c.ease = Math.min(3.0, c.ease + 0.1); c.interval = c.interval ? c.interval * c.ease : 1;
+         c.due = Date.now() + c.interval * DAY; }
+  await DB.put('cards', c);
+  nextCard();
+}
+
+/* =========================================================================
+   9. 导航与设置
+   ========================================================================= */
+function show(v) {
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (v === 'book') refreshBook();
+  if (v === 'deck') refreshDeck();
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+
+function updateProviderUI() {
+  const p = cfg.provider;
+  $('#set-cpa').style.display = p === 'cpa' ? 'block' : 'none';
+  $('#set-ollama').style.display = p === 'ollama' ? 'block' : 'none';
+  $('#set-anthropic').style.display = p === 'anthropic' ? 'block' : 'none';
+
+  if ($('#active-backend-text')) {
+    if (p === 'cpa') {
+      $('#active-backend-text').textContent = `CPA 代理 (${cfg.cpaModel})`;
+    } else if (p === 'ollama') {
+      $('#active-backend-text').textContent = `本地 Ollama (${cfg.ollamaModel})`;
+    } else {
+      $('#active-backend-text').textContent = `Anthropic API (${cfg.model})`;
+    }
+  }
+}
+
+window.switchToCpa = () => {
+  localStorage.setItem('provider', 'cpa');
+  $('#provider').value = 'cpa';
+  updateProviderUI();
+  $('#err-box').innerHTML = '';
+};
+
+window.switchToOllama = () => {
+  localStorage.setItem('provider', 'ollama');
+  $('#provider').value = 'ollama';
+  updateProviderUI();
+  $('#err-box').innerHTML = '';
+};
+
+// 默认配置
+if (!localStorage.getItem('provider')) {
+  localStorage.setItem('provider', 'cpa');
+}
+if (!localStorage.getItem('cpa_key')) {
+  localStorage.setItem('cpa_key', 'REMOVED_KEY');
+}
+if (!localStorage.getItem('cpa_base_url')) {
+  localStorage.setItem('cpa_base_url', 'https://api.earnrmb.online');
+}
+if (!localStorage.getItem('cpa_model')) {
+  localStorage.setItem('cpa_model', 'gemini-flash');
+}
+
+$('#provider').value = cfg.provider;
+$('#cpa-base-url').value = cfg.cpaBaseUrl;
+$('#cpa-key').value = cfg.cpaKey;
+$('#cpa-model').value = cfg.cpaModel;
+$('#ollama-host').value = cfg.ollamaHost;
+$('#ollama-model').value = cfg.ollamaModel;
+$('#key').value = cfg.key;
+$('#model').value = cfg.model;
+$('#effort').value = cfg.effort;
+updateProviderUI();
+
+$('#provider').onchange = e => {
+  localStorage.setItem('provider', e.target.value);
+  updateProviderUI();
+};
+$('#cpa-base-url').oninput = e => localStorage.setItem('cpa_base_url', e.target.value.trim());
+$('#cpa-key').oninput      = e => localStorage.setItem('cpa_key', e.target.value.trim());
+$('#cpa-model').onchange   = e => {
+  localStorage.setItem('cpa_model', e.target.value);
+  updateProviderUI();
+};
+$('#ollama-host').oninput  = e => localStorage.setItem('ollama_host', e.target.value.trim());
+$('#ollama-model').oninput = e => {
+  localStorage.setItem('ollama_model', e.target.value.trim());
+  updateProviderUI();
+};
+$('#key').oninput          = e => localStorage.setItem('key', e.target.value.trim());
+$('#model').onchange       = e => {
+  localStorage.setItem('model', e.target.value);
+  updateProviderUI();
+};
+$('#effort').onchange      = e => localStorage.setItem('effort', e.target.value);
+
+$('#fetch-ollama-models').onclick = async () => {
+  const host = ($('#ollama-host').value || 'http://127.0.0.1:11434').replace(/\/+$/, '');
+  const btn = $('#fetch-ollama-models');
+  btn.textContent = '获取中...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${host}/api/tags`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const models = data.models || [];
+    if (!models.length) { alert('未找到已安装的 Ollama 模型'); return; }
+    const sel = $('#ollama-model-select');
+    sel.innerHTML = models.map(m => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join('');
+    sel.value = $('#ollama-model').value || models[0].name;
+    sel.style.display = 'block';
+    $('#ollama-model').style.display = 'none';
+    sel.onchange = () => {
+      $('#ollama-model').value = sel.value;
+      localStorage.setItem('ollama_model', sel.value);
+      updateProviderUI();
+    };
+    $('#ollama-model').value = sel.value;
+    localStorage.setItem('ollama_model', sel.value);
+    updateProviderUI();
+  } catch (err) {
+    alert(`获取模型列表失败: ${err.message}\n请检查 Ollama 服务是否启动。`);
+  } finally {
+    btn.textContent = '获取已安装模型';
+    btn.disabled = false;
+  }
+};
+
+$('#seed-all').onclick = () => loadSeed('*');
+
+function setMode(m) {
+  deckMode = m; localStorage.setItem('deckMode', m);
+  $('#mode-term').classList.toggle('on', m === 'term');
+  $('#mode-fig').classList.toggle('on', m === 'fig');
+  if (current) { flipped = false; draw(); }
+}
+$('#mode-term').onclick = () => setMode('term');
+$('#mode-fig').onclick  = () => setMode('fig');
+setMode(deckMode);
+
+$('#export').onclick = async () => {
+  const blob = new Blob([JSON.stringify(await DB.all('entries'), null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `plants-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+};
+$('#wipe').onclick = async () => {
+  if (!confirm('清空所有观察记录和术语卡？不可恢复。')) return;
+  await DB.clear('entries'); await DB.clear('cards');
+  refreshBook(); refreshDeck(); alert('已清空');
+};
+
+refreshBook();
+</script>
+</body>
+</html>
