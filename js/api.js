@@ -11,6 +11,9 @@ const cfg = {
   get key()         { return localStorage.getItem('key') || '' },
   get model()       { return localStorage.getItem('model') || 'claude-opus-5' },
   get effort()      { return localStorage.getItem('effort') || 'medium' },
+  // 随机练习的地区（iNaturalist place），默认全中国
+  get practicePlaceId()   { return localStorage.getItem('practice_place_id') || '6903' },
+  get practicePlaceName() { return localStorage.getItem('practice_place_name') || '中国' },
 };
 
 const userPrompt = hint => hint ? `请拆解这株植物。用户补充的线索：${hint}` : '请拆解这株植物。';

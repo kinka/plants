@@ -29,7 +29,7 @@ async function refreshBook() {
          <button class="ghost" id="del">删除这条</button></div>
        <img src="${e.img}" style="max-width:100%;border-radius:8px;margin-top:12px">
        ${e.hint ? `<p class="tiny muted">线索：${esc(e.hint)}</p>` : ''}
-       </div>` + renderCompare(e.quiz) + renderResult(e.data, false);
+       </div>` + renderSource(e.source, e.data) + renderCompare(e.quiz) + renderResult(e.data, false);
     $('#del').onclick = async () => { await DB.del('entries', e.id); $('#detail').innerHTML=''; refreshBook(); };
     $('#detail').scrollIntoView({behavior:'smooth'});
   });

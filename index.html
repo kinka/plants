@@ -30,6 +30,10 @@
       </div>
       <img id="preview" hidden>
     </div>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="practice">没有照片？随机来一张</button>
+      <span class="tiny muted" id="practice-note"></span>
+    </div>
     <input type="file" id="file" accept="image/*" hidden>
 
     <label class="fld" style="margin-top:14px">
@@ -184,6 +188,15 @@
     </div>
   </div>
   <div class="card">
+    <div class="sec-title">随机练习</div>
+    <p class="tiny muted">照片来自 iNaturalist 的研究级观察。当前地区：<b id="place-now"></b></p>
+    <div class="row">
+      <input type="text" id="place-q" placeholder="城市名，拼音或英文更准，如 Hangzhou" style="flex:1">
+      <button class="ghost" id="place-search">搜索</button>
+    </div>
+    <div id="place-list" class="row" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
     <div class="sec-title">数据</div>
     <div class="row">
       <button class="ghost" id="export">导出全部笔记 JSON</button>
@@ -203,6 +216,7 @@
 <script src="js/render.js"></script>
 <script src="js/deck.js"></script>
 <script src="js/quiz.js"></script>
+<script src="js/practice.js"></script>
 <script src="js/observe.js"></script>
 <script src="js/notebook.js"></script>
 <script src="js/settings.js"></script>

@@ -26,16 +26,37 @@ function toDataUrl(file) {
 /* =========================================================================
    6. 观察流程
    ========================================================================= */
-let pending = null;   // 当前待分析的 dataURL
+let pending = null;         // 当前待分析的 dataURL
+let pendingSource = null;   // 随机练习的照片来源（自己上传的为 null）
 
-async function loadFile(file) {
-  if (!file || !file.type.startsWith('image/')) return;
-  pending = await toDataUrl(file);
+function setPending(img, source) {
+  pending = img; pendingSource = source;
+  $('#practice-note').textContent = source ? `照片 ${source.attribution} · 名字等 AI 看完再揭晓` : '';
   $('#preview').src = pending;
   $('#preview').hidden = false;
   $('#drop-hint').hidden = true;
   $('#go').disabled = false;
 }
+
+async function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  setPending(await toDataUrl(file), null);
+}
+
+$('#practice').onclick = async () => {
+  const btn = $('#practice');
+  btn.disabled = true;
+  $('#practice-note').innerHTML = `<span class="spin"></span> 从 iNaturalist 找一张${esc(cfg.practicePlaceName)}的植物…`;
+  try {
+    const { img, source } = await fetchPracticePhoto();
+    setPending(img, source);
+    $('#hint').value = source.place ? `拍摄地：${source.place}` : '';
+    $('#result').innerHTML = ''; $('#status').textContent = '';
+  } catch (e) {
+    $('#practice-note').textContent = `没取到照片：${e.message}`;
+  }
+  btn.disabled = false;
+};
 
 $('#drop').onclick = () => $('#file').click();
 $('#file').onchange = e => loadFile(e.target.files[0]);
@@ -78,7 +99,7 @@ $('#go').onclick = async () => {
   const currentModel = cfg.provider === 'cpa' ? cfg.cpaModel : (cfg.provider === 'ollama' ? cfg.ollamaModel : cfg.model);
   $('#status').innerHTML = `<span class="spin"></span> 正在观察…（${esc(currentModel)} 分析中）`;
 
-  const img = pending, hint = $('#hint').value.trim(), selfTest = $('#quiz').checked;
+  const img = pending, source = pendingSource, hint = $('#hint').value.trim(), selfTest = $('#quiz').checked;
   const t0 = Date.now();
   // 先发请求，用户答题和等 AI 同时进行
   const job = analyze(img, hint);
@@ -88,7 +109,7 @@ $('#go').onclick = async () => {
 
   try {
     const { data, usage } = await job;
-    const entry = { id: Date.now(), img, hint, data, at: new Date().toISOString() };
+    const entry = { id: Date.now(), img, hint, data, at: new Date().toISOString(), ...(source && { source }) };
     await DB.put('entries', entry);
     await addCards(data.glossary, entry.id);
     $('#status').textContent =
@@ -100,7 +121,7 @@ $('#go').onclick = async () => {
       await DB.put('entries', entry);
       await reviewMissed(entry.quiz);
     }
-    $('#result').innerHTML = renderCompare(entry.quiz) + renderResult(data, selfTest);
+    $('#result').innerHTML = renderSource(source, data) + renderCompare(entry.quiz) + renderResult(data, selfTest);
     refreshBook(); refreshDeck();
   } catch (e) {
     $('#err-box').innerHTML = `<div class="err">${esc(e.message)}</div>`;

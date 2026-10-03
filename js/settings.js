@@ -106,6 +106,29 @@ $('#fetch-ollama-models').onclick = async () => {
   }
 };
 
+$('#place-now').textContent = cfg.practicePlaceName;
+$('#place-search').onclick = async () => {
+  const text = $('#place-q').value.trim();
+  if (!text) return;
+  const box = $('#place-list');
+  box.innerHTML = '<span class="spin"></span>';
+  try {
+    const places = await searchPlaces(text);
+    box.innerHTML = places.length
+      ? places.map(p => `<button class="ghost" data-id="${p.id}">${esc(p.name)}</button>`).join('')
+      : '<span class="tiny muted">没找到，试试拼音或英文</span>';
+    box.querySelectorAll('[data-id]').forEach(b => b.onclick = () => {
+      localStorage.setItem('practice_place_id', b.dataset.id);
+      localStorage.setItem('practice_place_name', b.textContent);
+      $('#place-now').textContent = b.textContent;
+      box.innerHTML = '';
+    });
+  } catch (e) {
+    box.innerHTML = `<span class="tiny muted">搜索失败：${esc(e.message)}</span>`;
+  }
+};
+$('#place-q').onkeydown = e => { if (e.key === 'Enter') $('#place-search').click(); };
+
 $('#export').onclick = async () => {
   const blob = new Blob([JSON.stringify(await DB.all('entries'), null, 2)], {type:'application/json'});
   const a = document.createElement('a');
