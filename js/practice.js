@@ -11,6 +11,7 @@ async function fetchPracticePhoto() {
   const q = new URLSearchParams({
     taxon_id: PRACTICE_TAXON, place_id: cfg.practicePlaceId, quality_grade: 'research',
     photos: 'true', rank: 'species', order_by: 'random', per_page: '1', locale: 'zh-CN',
+    _: Math.random().toString(36).slice(2),   // API 前面有 CDN 缓存 5 分钟，同一 URL 会一直返回同一张
   });
   const r = await fetch(`${INAT}/observations?${q}`);
   if (!r.ok) throw new Error(`iNaturalist 返回 HTTP ${r.status}`);
