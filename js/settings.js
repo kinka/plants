@@ -9,102 +9,58 @@ function show(v) {
 }
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
 
-function updateProviderUI() {
-  const p = cfg.provider;
-  $('#set-cpa').style.display = p === 'cpa' ? 'block' : 'none';
-  $('#set-ollama').style.display = p === 'ollama' ? 'block' : 'none';
-  $('#set-anthropic').style.display = p === 'anthropic' ? 'block' : 'none';
-
-  if ($('#active-backend-text')) {
-    if (p === 'cpa') {
-      $('#active-backend-text').textContent = `CPA 代理 (${cfg.cpaModel})`;
-    } else if (p === 'ollama') {
-      $('#active-backend-text').textContent = `本地 Ollama (${cfg.ollamaModel})`;
-    } else {
-      $('#active-backend-text').textContent = `Anthropic API (${cfg.model})`;
-    }
-  }
+function updateBackendLabel() {
+  let host = cfg.baseUrl;
+  try { host = new URL(cfg.baseUrl).host; } catch { /* 还没填成合法 URL */ }
+  $('#active-backend-text').textContent = `${cfg.model} · ${host}`;
+  $('#set-effort').hidden = apiKind() !== 'anthropic';
 }
 
-window.switchToCpa = () => {
-  localStorage.setItem('provider', 'cpa');
-  $('#provider').value = 'cpa';
-  updateProviderUI();
-  $('#err-box').innerHTML = '';
-};
+function fillModels(ids) {
+  const cur = cfg.model;
+  const all = [...new Set([cur, ...ids].filter(Boolean))];
+  $('#api-model').innerHTML = all.map(id => `<option value="${esc(id)}">${esc(id)}</option>`).join('');
+  $('#api-model').value = all.includes(cur) ? cur : all[0];
+  if ($('#api-model').value !== cur) localStorage.setItem('api_model', $('#api-model').value);
+  updateBackendLabel();
+}
 
-window.switchToOllama = () => {
-  localStorage.setItem('provider', 'ollama');
-  $('#provider').value = 'ollama';
-  updateProviderUI();
-  $('#err-box').innerHTML = '';
-};
-
-// 默认值统一在 cfg（js/api.js）里，这里只负责回填表单
-$('#provider').value = cfg.provider;
-$('#cpa-base-url').value = cfg.cpaBaseUrl;
-$('#cpa-key').value = cfg.cpaKey;
-$('#cpa-model').value = cfg.cpaModel;
-$('#ollama-host').value = cfg.ollamaHost;
-$('#ollama-model').value = cfg.ollamaModel;
-$('#key').value = cfg.key;
-$('#model').value = cfg.model;
-$('#effort').value = cfg.effort;
-updateProviderUI();
-
-$('#provider').onchange = e => {
-  localStorage.setItem('provider', e.target.value);
-  updateProviderUI();
-};
-$('#cpa-base-url').oninput = e => localStorage.setItem('cpa_base_url', e.target.value.trim());
-$('#cpa-key').oninput      = e => localStorage.setItem('cpa_key', e.target.value.trim());
-$('#cpa-model').onchange   = e => {
-  localStorage.setItem('cpa_model', e.target.value);
-  updateProviderUI();
-};
-$('#ollama-host').oninput  = e => localStorage.setItem('ollama_host', e.target.value.trim());
-$('#ollama-model').oninput = e => {
-  localStorage.setItem('ollama_model', e.target.value.trim());
-  updateProviderUI();
-};
-$('#key').oninput          = e => localStorage.setItem('key', e.target.value.trim());
-$('#model').onchange       = e => {
-  localStorage.setItem('model', e.target.value);
-  updateProviderUI();
-};
-$('#effort').onchange      = e => localStorage.setItem('effort', e.target.value);
-
-$('#fetch-ollama-models').onclick = async () => {
-  const host = ($('#ollama-host').value || 'http://127.0.0.1:11434').replace(/\/+$/, '');
-  const btn = $('#fetch-ollama-models');
-  btn.textContent = '获取中...';
+async function loadModels() {
+  const btn = $('#fetch-models');
+  const note = $('#models-note');
+  if (!cfg.apiKey) { note.textContent = '先填 API Key'; return; }
   btn.disabled = true;
+  note.textContent = '获取中…';
   try {
-    const res = await fetch(`${host}/api/tags`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const models = data.models || [];
-    if (!models.length) { alert('未找到已安装的 Ollama 模型'); return; }
-    const sel = $('#ollama-model-select');
-    sel.innerHTML = models.map(m => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join('');
-    sel.value = $('#ollama-model').value || models[0].name;
-    sel.style.display = 'block';
-    $('#ollama-model').style.display = 'none';
-    sel.onchange = () => {
-      $('#ollama-model').value = sel.value;
-      localStorage.setItem('ollama_model', sel.value);
-      updateProviderUI();
-    };
-    $('#ollama-model').value = sel.value;
-    localStorage.setItem('ollama_model', sel.value);
-    updateProviderUI();
-  } catch (err) {
-    alert(`获取模型列表失败: ${err.message}\n请检查 Ollama 服务是否启动。`);
-  } finally {
-    btn.textContent = '获取已安装模型';
-    btn.disabled = false;
+    const { ids, dropped } = await fetchModels();
+    fillModels(ids);
+    note.textContent = dropped
+      ? `${ids.length} 个模型，折叠了 ${dropped} 个重复的 Claude 快照`
+      : `${ids.length} 个模型`;
+  } catch (e) {
+    note.textContent = `没取到列表：${e.message}`;
   }
+  btn.disabled = false;
+}
+
+$('#api-base').value = cfg.baseUrl;
+$('#api-key').value = cfg.apiKey;
+fillModels([]);
+$('#effort').value = cfg.effort;
+updateBackendLabel();
+
+$('#api-base').oninput = e => {
+  localStorage.setItem('api_base', e.target.value.trim());
+  updateBackendLabel();
 };
+$('#api-key').oninput = e => localStorage.setItem('api_key', e.target.value.trim());
+$('#api-model').onchange = e => {
+  localStorage.setItem('api_model', e.target.value);
+  updateBackendLabel();
+};
+$('#fetch-models').onclick = loadModels;
+$('#effort').onchange = e => localStorage.setItem('effort', e.target.value);
+loadModels();
 
 $('#place-now').textContent = cfg.practicePlaceName;
 $('#place-search').onclick = async () => {

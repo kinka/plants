@@ -27,7 +27,7 @@ async function refreshBook() {
       `<div class="card"><div class="spread">
          <b>${esc(e.data.identification.common_name_zh)}</b>
          <button class="ghost" id="del">删除这条</button></div>
-       <img src="${e.img}" style="max-width:100%;border-radius:8px;margin-top:12px">
+       <div class="shots${(e.imgs?.length || 1) > 1 ? ' multi' : ''}">${(e.imgs?.length ? e.imgs : [e.img]).map(src => `<img src="${src}" alt="">`).join('')}</div>
        ${e.hint ? `<p class="tiny muted">线索：${esc(e.hint)}</p>` : ''}
        </div>` + renderSource(e.source, e.data) + renderCompare(e.quiz) + renderResult(e.data, false);
     $('#del').onclick = async () => { await DB.del('entries', e.id); $('#detail').innerHTML=''; refreshBook(); };

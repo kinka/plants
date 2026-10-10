@@ -29,9 +29,10 @@
         <span class="tiny">建议拍清楚：叶片正反面、叶柄与茎的连接处、花或果</span>
       </div>
       <img id="preview" hidden>
+      <div id="thumbs" hidden></div>
     </div>
     <div class="row" style="margin-top:10px">
-      <button class="ghost" id="practice">没有照片？随机来一张</button>
+      <button class="ghost" id="practice">没有照片？随机来一株</button>
       <span class="tiny muted" id="practice-note"></span>
     </div>
     <input type="file" id="file" accept="image/*" hidden>
@@ -42,8 +43,8 @@
     </label>
 
     <div class="spread" style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border-radius:8px;font-size:13px">
-      <div>当前后端：<b id="active-backend-text">本地 Ollama (qwen3.8:27b-mlx)</b></div>
-      <button class="ghost" style="padding:3px 10px;font-size:12px" onclick="show('set')">切换后端/设置</button>
+      <div>当前模型：<b id="active-backend-text">gemini-flash</b></div>
+      <button class="ghost" style="padding:3px 10px;font-size:12px" onclick="show('set')">设置</button>
     </div>
 
     <div class="row">
@@ -102,90 +103,35 @@
 <!-- ============ 设置 ============ -->
 <section class="view" id="v-set">
   <div class="card">
-    <div class="sec-title">模型服务提供商 (Provider)</div>
+    <div class="sec-title">模型</div>
     <label class="fld">
-      <span>选择后端</span>
-      <select id="provider">
-        <option value="cpa">CPA 代理节点（gemini-flash / Claude）</option>
-        <option value="ollama">本地 Ollama（免费离线 · qwen3.8:27b-mlx）</option>
-        <option value="anthropic">Anthropic 官方 API（Claude 直连）</option>
+      <span>BASE URL</span>
+      <input type="text" id="api-base" placeholder="https://api.earnrmb.online" spellcheck="false">
+    </label>
+    <label class="fld">
+      <span>API KEY（只存在本机 localStorage）</span>
+      <input type="password" id="api-key" placeholder="sk-..." spellcheck="false">
+    </label>
+    <label class="fld">
+      <span>模型</span>
+      <div class="row">
+        <select id="api-model" style="flex:1"></select>
+        <button class="ghost" id="fetch-models" type="button">获取列表</button>
+      </div>
+      <span class="tiny muted" id="models-note"></span>
+    </label>
+    <label class="fld" id="set-effort" hidden>
+      <span>思考强度 effort（仅 api.anthropic.com）</span>
+      <select id="effort">
+        <option value="low">low — 快，认常见种够用</option>
+        <option value="medium" selected>medium — 均衡</option>
+        <option value="high">high — 疑难种/细微特征</option>
       </select>
     </label>
-
-    <!-- CPA 代理配置 -->
-    <div id="set-cpa">
-      <label class="fld">
-        <span>CPA BASE URL</span>
-        <input type="text" id="cpa-base-url" placeholder="https://api.earnrmb.online">
-      </label>
-      <label class="fld">
-        <span>CPA AUTH TOKEN / API KEY</span>
-        <input type="password" id="cpa-key" placeholder="sk-...">
-      </label>
-      <div class="row">
-        <label class="fld" style="flex:1;min-width:180px;margin:0">
-          <span>模型</span>
-          <select id="cpa-model">
-            <option value="gemini-flash">gemini-flash（推荐 · 极速多模态）</option>
-            <option value="claude-opus-5">claude-opus-5（高精度推理）</option>
-            <option value="claude-sonnet-5">claude-sonnet-5（均衡）</option>
-          </select>
-        </label>
-      </div>
-      <p class="tiny muted" style="margin-top:14px">
-        默认使用 <code>gemini-flash</code> 进行多模态视觉观察。Token 只存在本机 localStorage。
-      </p>
-    </div>
-
-    <!-- Ollama 配置 -->
-    <div id="set-ollama" style="display:none">
-      <label class="fld">
-        <span>OLLAMA 服务地址</span>
-        <input type="text" id="ollama-host" placeholder="http://127.0.0.1:11434">
-      </label>
-      <div class="row">
-        <label class="fld" style="flex:1;min-width:180px;margin:0">
-          <span>OLLAMA 模型</span>
-          <div class="row" style="gap:8px">
-            <input type="text" id="ollama-model" placeholder="qwen3.8:27b-mlx" style="flex:1">
-            <select id="ollama-model-select" style="display:none;flex:1"></select>
-            <button class="ghost" id="fetch-ollama-models" type="button">获取已安装模型</button>
-          </div>
-        </label>
-      </div>
-      <p class="tiny muted" style="margin-top:14px">
-        确保本机已启动 <code>ollama serve</code>。推荐使用 <code>qwen3.8:27b-mlx</code> 等支持 Vision 的多模态模型。
-      </p>
-    </div>
-
-    <!-- Anthropic 配置 -->
-    <div id="set-anthropic" style="display:none">
-      <label class="fld">
-        <span>ANTHROPIC API KEY（只存在本机 localStorage，不会上传到任何地方）</span>
-        <input type="password" id="key" placeholder="sk-ant-...">
-      </label>
-      <div class="row">
-        <label class="fld" style="flex:1;min-width:180px;margin:0">
-          <span>模型</span>
-          <select id="model">
-            <option value="claude-opus-5">claude-opus-5（视觉最强，推荐）</option>
-            <option value="claude-sonnet-5">claude-sonnet-5（更快更便宜）</option>
-          </select>
-        </label>
-        <label class="fld" style="flex:1;min-width:180px;margin:0">
-          <span>思考强度 effort</span>
-          <select id="effort">
-            <option value="low">low — 快，认常见种够用</option>
-            <option value="medium" selected>medium — 均衡</option>
-            <option value="high">high — 疑难种/细微特征</option>
-          </select>
-        </label>
-      </div>
-      <p class="tiny muted" style="margin-top:14px">
-        浏览器直连 Anthropic API 需要 <code>anthropic-dangerous-direct-browser-access</code> 头，
-        key 会暴露在前端。<b>仅限本机自用，不要把这个文件部署到公网。</b>
-      </p>
-    </div>
+    <p class="tiny muted">
+      根地址即可。<code>api.anthropic.com</code> 走官方接口（浏览器直连，key 会留在前端，别部署到公网）；
+      其他地址按 <code>/v1/messages</code> 调用。模型列表来自 <code>/v1/models</code>。
+    </p>
   </div>
   <div class="card">
     <div class="sec-title">随机练习</div>

@@ -1,31 +1,51 @@
 /* =========================================================================
-   随机练习：从 iNaturalist 随机取一张本地区的研究级被子植物照片
+   随机练习：从 iNaturalist 随机取一株本地区的研究级被子植物
    · 研究级 = 至少两位社区成员鉴定一致，可以当作「标准答案」和 AI 对照
+   · 同一条观察里往往有整体、叶、花、果几个角度，优先挑照片多的，最多带 4 张
    · 公开 API，不需要 key；照片在 S3 上，允许跨域，可以直接画进 canvas
    · 物种名要等 AI 看完再揭晓，所以原观察链接也放到揭晓时才给
    ========================================================================= */
 const INAT = 'https://api.inaturalist.org/v1';
 const PRACTICE_TAXON = 47125;   // 被子植物（开花植物）
+const PRACTICE_SHOTS = 4;
+
+async function fetchPhotoBlob(url) {
+  const large = url.replace('/square.', '/large.');
+  let r = await fetch(large);
+  if (!r.ok) r = await fetch(url.replace('/square.', '/medium.'));
+  if (!r.ok) throw new Error(`照片 HTTP ${r.status}`);
+  return r.blob();
+}
 
 async function fetchPracticePhoto() {
   const q = new URLSearchParams({
     taxon_id: PRACTICE_TAXON, place_id: cfg.practicePlaceId, quality_grade: 'research',
-    photos: 'true', rank: 'species', order_by: 'random', per_page: '1', locale: 'zh-CN',
-    _: Math.random().toString(36).slice(2),   // API 前面有 CDN 缓存 5 分钟，同一 URL 会一直返回同一张
+    photos: 'true', rank: 'species', order_by: 'random', per_page: '30', locale: 'zh-CN',
+    _: Math.random().toString(36).slice(2),   // API 前面有 CDN 缓存 5 分钟，同一 URL 会一直返回同一批
   });
   const r = await fetch(`${INAT}/observations?${q}`);
   if (!r.ok) throw new Error(`iNaturalist 返回 HTTP ${r.status}`);
-  const o = (await r.json()).results[0];
-  if (!o) throw new Error(`「${cfg.practicePlaceName}」没有找到研究级照片，换个大一点的地区试试`);
+  const pool = (await r.json()).results.filter(o => o.taxon && o.photos?.some(p => p.url));
+  if (!pool.length) throw new Error(`「${cfg.practicePlaceName}」没有找到研究级照片，换个大一点的地区试试`);
 
-  const p = o.photos[0];
-  const blob = await (await fetch(p.url.replace('/square.', '/large.'))).blob();
+  // 这一批里挑照片最多的。张数相同则保留 API 的随机顺序（sort 稳定）
+  pool.sort((a, b) => b.photos.length - a.photos.length);
+  const o = pool[0];
+  const shots = o.photos.filter(p => p.url).slice(0, PRACTICE_SHOTS);
+  const imgs = (await Promise.all(shots.map(async p => {
+    try { return await toDataUrl(await fetchPhotoBlob(p.url), 1600); }
+    catch { return null; }
+  }))).filter(Boolean);
+  if (!imgs.length) throw new Error('照片下载失败，再试一次');
+
+  const credits = [...new Set(shots.map(p => p.attribution).filter(Boolean))];
   return {
-    img: await toDataUrl(blob),
+    imgs,
     source: {
       site: 'iNaturalist', uri: o.uri, place: o.place_guess || '',
       name_zh: o.taxon.preferred_common_name || '', sci: o.taxon.name,
-      attribution: p.attribution, license: p.license_code || '',
+      attribution: credits.length > 2 ? `${credits[0]} 等 ${imgs.length} 张` : credits.join('；'),
+      license: [...new Set(shots.map(p => p.license_code).filter(Boolean))].join(' / '),
     },
   };
 }
